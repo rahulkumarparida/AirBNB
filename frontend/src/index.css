@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+
+body {
+  padding:10px 45px 0px 45px ;
+  font: "Airbnb Cereal VF", Inter, system-ui, sans-serif;
+  font-size: 14px;
+}
+
+@theme {
+  /* Brand Colors */
+  --color-airbnb: #FF385C;      /* Airbnb Red/Pink */
+  --color-airbnb-dark: #E31C5F; /* Hover/Darker shade */
+  --color-gray-1: #e8e8e8;      /* Background gray */
+  --color-gray-2: #DDDDDD;      /* Borders */
+  --color-gray-3: #717171;      /* Secondary text */
+  --color-black: #222222;       /* Primary text */
+  --color-white: #FFFFFF;       /* Background / text */
+
+  /* Spacing (based on Airbnb’s roomy layout) */
+  --spacing-5: 1.25rem; /* cards padding */
+  --spacing-7: 1.75rem;
+  --spacing-10: 2.5rem;
+
+  /* Radii */
+  --radius-md: 0.75rem;  /* card corners */
+  --radius-full: 9999px; /* buttons, avatars */
+
+  /* Fonts */
+  --font-sans: 'Airbnb Cereal VF', Inter, system-ui, sans-serif;
+  --font-heading: 'Airbnb Cereal App', Inter, system-ui, sans-serif;
+
+  /* Shadows */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
