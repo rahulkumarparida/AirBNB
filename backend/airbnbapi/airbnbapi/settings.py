@@ -1,7 +1,12 @@
 import os
 from pathlib import Path
 from datetime import timedelta
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
 import private as p 
+
 
 DB_NAME = p.DB_NAME
 DB_USER = p.DB_USER
@@ -9,6 +14,13 @@ DB_PASSWORD =  p.DB_PASSWORD
 DB_HOST = p.DB_HOST
 DB_PORT = p.DB_PORT
 
+
+cloudinary.config(
+    cloud_name = p.CLOUD_NAME,
+    api_key = p.API_KEY,
+    api_secret = p.API_SECRET
+)
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,6 +52,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     "corsheaders",
+    'cloudinary',
+    'cloudinary_storage',
     "users",
     "listings",
     "bookings",
