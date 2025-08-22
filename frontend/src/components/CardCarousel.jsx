@@ -32,7 +32,6 @@ export const CardCarousel = () => {
                         <ScrollButton />
                     </button>
                 </div>
-
             </div>
             <div className='flex gap-3 overflow-x-auto scrollbar-none' ref={scrollRef} >
                 {

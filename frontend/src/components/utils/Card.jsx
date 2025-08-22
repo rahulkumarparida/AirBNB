@@ -10,9 +10,9 @@ export const Card = ({
 }) => {
 
     return (
-        <div className='flex-shrink-0'>
+        <div className='flex-shrink-0 cursor-pointer'>
             <div className='relative'>
-                <img src={image} className='size-46 object-cover rounded-2xl' />
+                <img src={image} className='size-45 object-cover rounded-2xl' />
                 <div className='absolute top-3 left-3 flex gap-5' >
                     <div className=' bg-white font-semibold text-xs rounded-full px-2 py-1' >
                         Guest favourite
