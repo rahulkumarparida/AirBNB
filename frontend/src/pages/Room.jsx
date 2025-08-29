@@ -1,6 +1,5 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import Data from '../Dummy/Dummy.json'
 import { Share, Heart, Grip, DoorClosed, MessageCircleHeart, CircleParking, Shell, Wifi, Car, WashingMachine, BellOff, ChevronUp, ChevronDown, AirVent, Tv, Briefcase, CookingPot, BellRing } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import { GuestFavCard } from '../components/utils/GuestFavCard';
@@ -10,12 +9,14 @@ import { RatingsBar } from '../components/utils/RatingsBar';
 import { RatingIcon } from '../components/utils/RatingIcon';
 import ReviewCard from '../components/utils/ReviewCard';
 import MapEmbed from '../components/MapEmbed';
+import { StoreContext } from '../context/StoreContext.js';
 
 
 const Room = () => {
     const { id } = useParams();
-    const hotel = Data.hotels.find(hotel => hotel.id === parseInt(id))
-    console.log("hotel: ", hotel);
+    const { hotels } = useContext(StoreContext)
+    console.log("hotels: ", hotels);
+    const hotel = hotels.hotels.find(hotel => hotel.id === parseInt(id))
 
     const [isChevronUp, setIsChevornUp] = useState(false)
     const [isDropdownOn, setIsDropdownOn] = useState(false)
@@ -138,7 +139,7 @@ const Room = () => {
         {
             category: "Check-in",
             icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"
-                class="w-6 h-6 text-yellow-500">
+                className="w-6 h-6 text-yellow-500">
                 <path d="M16.84 27.16v-3.4l-.26.09c-.98.32-2.03.51-3.11.55h-.7A11.34 11.34 0 0 1 1.72 13.36v-.59A11.34 11.34 0 0 1 12.77 1.72h.59c6.03.16 10.89 5.02 11.04 11.05V13.45a11.3 11.3 0 0 1-.9 4.04l-.13.3 7.91 7.9v5.6H25.7l-4.13-4.13zM10.31 7.22a3.1 3.1 0 1 1 0 6.19 3.1 3.1 0 0 1 0-6.2zm0 2.06a1.03 1.03 0 1 0 0 2.06 1.03 1.03 0 0 0 0-2.06zM22.43 25.1l4.12 4.13h2.67v-2.67l-8.37-8.37.37-.68.16-.3c.56-1.15.9-2.42.96-3.77v-.64a9.28 9.28 0 0 0-9-9h-.55a9.28 9.28 0 0 0-9 9v.54a9.28 9.28 0 0 0 13.3 8.1l.3-.16 1.52-.8v4.62z"></path>
             </svg>
         },
@@ -482,8 +483,8 @@ const Room = () => {
                             }
                         </div>
                         {
-                            rate.map((item) => (
-                                <RatingIcon key={item} category={item.category} icon={item.icon} />
+                            rate.map((item, idx) => (
+                                <RatingIcon key={idx} category={item.category} icon={item.icon} />
                             ))
                         }
                     </div>

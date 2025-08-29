@@ -1,16 +1,16 @@
 import { Card } from './utils/Card'
 import { Header } from './utils/Header'
-import Data from '../Dummy/Dummy.json'
-import { useRef } from 'react'
+import { useContext, useRef } from 'react'
 import { ScrollButton } from './utils/ScrollButton'
+import { StoreContext } from '../context/StoreContext'
 
 
 
 export const CardCarousel = () => {
 
+    const { hotels } = useContext(StoreContext)
+
     const scrollRef = useRef(null)
-
-
     const scrollLeft = () => {
         scrollRef.current.scrollBy({ left: -400, behavior: "smooth" })
     }
@@ -34,7 +34,7 @@ export const CardCarousel = () => {
             </div>
             <div className='flex gap-3 overflow-x-auto scrollbar-none' ref={scrollRef} >
                 {
-                    Data.hotels.map((item, idx) => (
+                    hotels.hotels.map((item, idx) => (
                         <Card key={idx} hotelName={item.name} price={item.price} image={item.image[0]} id={item.id} />
                     ))
                 }
