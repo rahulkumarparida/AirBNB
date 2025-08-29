@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import Data from '../Dummy/Dummy.json'
-import { Share, Heart, Grip, DoorClosed, MessageCircleHeart, CircleParking, Shell, Wifi, Car, WashingMachine, BellOff, ChevronUp, ChevronDown } from 'lucide-react';
+import { Share, Heart, Grip, DoorClosed, MessageCircleHeart, CircleParking, Shell, Wifi, Car, WashingMachine, BellOff, ChevronUp, ChevronDown, AirVent, Tv, Briefcase, CookingPot, BellRing } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import { GuestFavCard } from '../components/utils/GuestFavCard';
 import { Amenities } from '../components/utils/amenities';
@@ -65,23 +65,23 @@ const Room = () => {
             strikethrough: true
         },
         {
-            icon: Car,
+            icon: CookingPot,
             title: "Kitchen"
         },
         {
-            icon: Car,
+            icon: Briefcase,
             title: "Dedicated Workspace"
         },
         {
-            icon: Car,
+            icon: Tv,
             title: "TV"
         },
         {
-            icon: Car,
+            icon: AirVent,
             title: "Air Conditioning"
         },
         {
-            icon: Car,
+            icon: BellRing,
             title: "Smoke alarm",
             strikethrough: true
         },

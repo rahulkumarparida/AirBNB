@@ -108,7 +108,7 @@ export const Navbar = () => {
                                 <p className='text-xs text-gray-3' >It's easy to start hosting and earn extra income.</p>
                             </div>
                             <div>
-                                <img src="./assets/host.png" alt="logo" className='w-40' />
+                                <img src="/assets/host.png" alt="logo" className='w-40' />
                             </div>
                         </div>
                         <hr className="border-gray-300 mt-2 mb-3"></hr>
