@@ -11,7 +11,7 @@ export const SearchResults = () => {
         (h) => h.location.city.toLowerCase() === city.toLowerCase()
     );
 
-    const [selectedHotel, setSelectedHotel] = useState(searchHotel[0] || null);
+    const [selectedHotel, setSelectedHotel] = useState(searchHotel[2] || null);
 
     if (!searchHotel.length) {
         return <p className="text-center text-lg">No hotels found in {city}.</p>;
@@ -26,7 +26,7 @@ export const SearchResults = () => {
                 {searchHotel.map((item) => (
                     <div
                         key={item.id}
-                        onClick={() => setSelectedHotel(item)}
+                        onMouseEnter={() => setSelectedHotel(item)}
                         className="flex-shrink-0"
                     >
                         <SearchCard
