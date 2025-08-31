@@ -1,11 +1,18 @@
 import { useContext, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { StoreContext } from "../context/StoreContext";
 import { SearchCard } from "../components/utils/SearchCard";
 
 export const SearchResults = () => {
     const { city } = useParams();
+    const location = useLocation()
     const { hotels } = useContext(StoreContext);
+    const params = new URLSearchParams(location.search);
+    const checkIn = params.get("checkIn");   // "2025-09-05"
+    console.log("checkIn: ", checkIn);
+    const checkOut = params.get("checkOut"); // "2025-09-07"
+    console.log("checkOut: ", checkOut);
+
 
     const searchHotel = hotels.hotels.filter(
         (h) => h.location.city.toLowerCase() === city.toLowerCase()

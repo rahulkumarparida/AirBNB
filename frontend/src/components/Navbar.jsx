@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion'
 import { SearchCards } from './utils/SearchCards';
 import { useNavigate } from 'react-router-dom';
+import { format } from "date-fns";
 
 export const Navbar = () => {
 
@@ -90,11 +91,18 @@ export const Navbar = () => {
 
     const handleSearch = () => {
         if (query.trim() !== "") {
-            // convert spaces to hyphens/lowercase for URL
             const citySlug = query.toLowerCase().replace(/\s+/g, "-");
-            navigate(`/${citySlug}`);
+
+            const params = new URLSearchParams();
+
+            if (checkIn) params.append("checkIn", format(checkIn, "yyyy-MM-dd"));
+            if (checkOut) params.append("checkOut", format(checkOut, "yyyy-MM-dd"));
+
+            const queryString = params.toString();
+            navigate(queryString ? `/${citySlug}?${queryString}` : `/${citySlug}`);
         }
     };
+
 
 
     return (
