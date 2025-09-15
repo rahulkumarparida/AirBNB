@@ -1,16 +1,24 @@
-import data from '../../Dummy/Dummy.json'
+
 import { HeartButton } from './HeartButton';
 import { useNavigate } from 'react-router-dom'
+import { calculateDays } from './CalculateDays';
 
 export const SearchCard = ({
-    image = data.hotels[0].image[0],
-    hotelName = data.hotels[0].name,
-    price = data.payments[0].amount,
-    ratings = data.reviews[0].rating,
+    image,
+    hotelName,
+    price,
+    checkIn,
+    checkOut,
+    ratings,
     id,
+    rooms
 }) => {
 
     const navigate = useNavigate()
+    const night = calculateDays(checkIn, checkOut)
+    console.log("night: ", night);
+
+
 
     return (
         <div
@@ -36,8 +44,12 @@ export const SearchCard = ({
 
             {/* TEXT PART */}
             <div className="mt-2">
-                <p className="font-medium">{hotelName}</p>
-                <p className="text-xs">{`₹${price} for one night ★ ${ratings}`}</p>
+                <div className='flex justify-between'>
+                    <p className="font-medium">{hotelName}</p>
+                    <span>★{ratings}</span>
+                </div>
+                <p className="text-xs">{`₹${night * price} for ${night} night `}</p>
+                <p className='text-md'>{`${rooms.bedroom} Bedroom ∙ ${rooms.beds} Bed ∙ ${rooms.bathroom} Bathroom`}</p>
             </div>
         </div>
 

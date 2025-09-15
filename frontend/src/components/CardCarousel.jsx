@@ -7,7 +7,6 @@ import { StoreContext } from '../context/StoreContext'
 export const CardCarousel = () => {
 
     const { hotels } = useContext(StoreContext)
-    console.log("hotels: ", hotels);
 
     const scrollRef = useRef(null)
     const scrollLeft = () => {

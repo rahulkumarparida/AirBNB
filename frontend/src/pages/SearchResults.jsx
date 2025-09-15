@@ -1,22 +1,18 @@
 import { useContext, useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { StoreContext } from "../context/StoreContext";
 import { SearchCard } from "../components/utils/SearchCard";
 
 export const SearchResults = () => {
     const { city } = useParams();
-    const location = useLocation()
-    const { hotels } = useContext(StoreContext);
-    const params = new URLSearchParams(location.search);
-    const checkIn = params.get("checkIn");   // "2025-09-05"
-    console.log("checkIn: ", checkIn);
-    const checkOut = params.get("checkOut"); // "2025-09-07"
-    console.log("checkOut: ", checkOut);
+
+    const { hotels, userData } = useContext(StoreContext);
 
 
     const searchHotel = hotels.hotels.filter(
         (h) => h.location.city.toLowerCase() === city.toLowerCase()
     );
+    console.log("searchHotel: ", searchHotel);
 
     const [selectedHotel, setSelectedHotel] = useState(searchHotel[2] || null);
 
@@ -40,8 +36,11 @@ export const SearchResults = () => {
                             image={item.images[1].url}
                             hotelName={item.title}
                             price={item.price_per_night}
-                            ratings={item.reviews[0].ratings}
+                            ratings={(item.reviews[0].cleanliness + item.reviews[0].location + item.reviews[0].rating + item.reviews[0].service) / 4}
                             id={item.id}
+                            checkIn={userData.current.checkIn}
+                            checkOut={userData.current.checkOut}
+                            rooms={item.rooms[0]}
                         />
                     </div>
                 ))}

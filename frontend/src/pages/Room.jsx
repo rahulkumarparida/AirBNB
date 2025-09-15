@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Share, Heart, Grip, DoorClosed, MessageCircleHeart, CircleParking, Shell, Wifi, Car, WashingMachine, BellOff, ChevronUp, ChevronDown, AirVent, Tv, Briefcase, CookingPot, BellRing } from 'lucide-react';
 import DatePicker from 'react-datepicker';
@@ -10,20 +10,28 @@ import { RatingIcon } from '../components/utils/RatingIcon';
 import ReviewCard from '../components/utils/ReviewCard';
 import MapEmbed from '../components/MapEmbed';
 import { StoreContext } from '../context/StoreContext.js';
+import { calculateDays } from '../components/utils/CalculateDays.js';
 
 const Room = () => {
     const { id } = useParams();
+    const { userData } = useContext(StoreContext)
+    console.log("userData: ", userData);
     const { hotels } = useContext(StoreContext)
-    console.log("hotels: ", hotels);
     const hotel = hotels.hotels.find(hotel => hotel.id === parseInt(id))
+    console.log("hotel: ", hotel);
 
     const [isChevronUp, setIsChevornUp] = useState(false)
     const [isDropdownOn, setIsDropdownOn] = useState(false)
 
     const [adult, setAdult] = useState(1)
-    const [children, setChindren] = useState(0)
+    const [children, setChildren] = useState(0)
     const [infant, setInfant] = useState(0)
 
+    const [checkIn, setCheckIn] = useState("")
+    const [checkOut, setCheckOut] = useState("")
+    console.log("checkOut: ", checkOut);
+
+    const nights = calculateDays(checkIn, checkOut);
 
     const aminites = [
         {
@@ -240,12 +248,32 @@ const Room = () => {
         },
     ];
 
+    
+
+
 
 
     const dropDownMenu = () => {
         setIsChevornUp(!isChevronUp)
         setIsDropdownOn(!isDropdownOn)
     }
+
+    useEffect(() => {
+        if (userData?.current) {
+            setAdult(userData.current.guests.adult || 1);
+            setChildren(userData.current.guests.children || 0);
+            setInfant(userData.current.guests.infant || 0);
+
+            setCheckIn(userData.current.checkIn ? new Date(userData.current.checkIn) : null);
+            setCheckOut(userData.current.checkOut ? new Date(userData.current.checkOut) : null);
+        }
+
+    }, []);
+
+
+
+
+
     return (
         <div className='flex flex-col items-center max-w-[75rem] mx-auto py-10'>
             <div>
@@ -379,16 +407,28 @@ const Room = () => {
 
                             {/* Check out form */}
                             <div className='border border-gray-300 p-5 inline-block rounded-xl sticky top-50' >
-                                <div className='text-xl py-5' >Add dates for prices</div>
+                                <div className='text-xl py-5' >{nights == 0? "Add dates to get the price":`₹${nights*hotel.price_per_night}`}</div>
                                 <div className=' inline-flex flex-col' >
                                     <div className='flex border-b-0 border border-gray-700 rounded-t-xl' >
                                         <div className='inline-flex flex-col p-3 px-8  border-r-1'>
                                             <label className='font-medium text-xs' htmlFor='checkin'>CHECK-IN</label>
-                                            <DatePicker id='checkin' placeholderText='Add dates' className='outline-0  w-25' />
+                                            <DatePicker onChange={(date) => setCheckIn(date)}
+                                                selected={checkIn}
+                                                dateFormat="dd/MM/yyyy"
+                                                id='checkin'
+                                                placeholderText='Add dates'
+                                                className='outline-0  w-25'
+                                            />
                                         </div>
                                         <div className='inline-flex flex-col p-3 px-8 '>
                                             <label className='font-medium text-xs ' htmlFor='checkin'>CHECK-OUT</label>
-                                            <DatePicker id='checkin' placeholderText='Add dates' className='outline-0  w-25' />
+                                            <DatePicker onChange={(date) => setCheckOut(date)}
+                                                dateFormat="dd/MM/yyyy"
+                                                id='checkin'
+                                                placeholderText='Add dates'
+                                                selected={checkOut}
+                                                className='outline-0  w-25'
+                                            />
                                         </div>
                                     </div>
                                     <div className='border flex justify-between items-center border-gray-700 rounded-b-xl px-8 p-3 '
@@ -401,7 +441,7 @@ const Room = () => {
                                     </div>
 
 
-                                    <button className='bg-airbnb py-3 rounded-full text-white font-semibold mt-5' >Check availability</button>
+                                    <button className='bg-airbnb py-3 rounded-full text-white font-semibold mt-5' >Reserve</button>
                                     {/* dropdown menu */}
                                     <div className={`  absolute bg-white h-80 w-[21rem] top-55 z-10 p-5 rounded-xl ${isDropdownOn ? "block" : "hidden"} shadow-[0_7px_29px_0_rgba(100,100,111,0.2)] `}>
                                         <div className='flex justify-between pt-3' >
@@ -421,9 +461,9 @@ const Room = () => {
                                                 <div>Age 2-12</div>
                                             </div>
                                             <div className='flex gap-2.5 items-center' >
-                                                <button className='p-2 flex justify-center items-center size-8 border border-gray-600 rounded-full' disabled={children <= 0} onClick={() => setChindren((prev => prev - 1))} >-</button>
+                                                <button className='p-2 flex justify-center items-center size-8 border border-gray-600 rounded-full' disabled={children <= 0} onClick={() => setChildren((prev => prev - 1))} >-</button>
                                                 <div>{children}</div>
-                                                <div className='p-2 flex justify-center items-center size-8 border border-gray-600 rounded-full' onClick={() => setChindren((prev => prev + 1))} >+</div>
+                                                <div className='p-2 flex justify-center items-center size-8 border border-gray-600 rounded-full' onClick={() => setChildren((prev => prev + 1))} >+</div>
                                             </div>
                                         </div>
                                         <div className='flex justify-between pt-3' >
@@ -518,4 +558,4 @@ const Room = () => {
     )
 }
 
-export default Room
+export default Room 

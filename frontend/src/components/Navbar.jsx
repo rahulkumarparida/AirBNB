@@ -1,15 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css";
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion'
 import { SearchCards } from './utils/SearchCards';
 import { useNavigate } from 'react-router-dom';
 import { format } from "date-fns";
+import { StoreContext } from '../context/StoreContext';
 
 export const Navbar = () => {
 
+    const location = useLocation()
     const [toggleHamburger, setToggleHamburger] = useState(false)
     const [hide, setHide] = useState(false)
     const [lastScrollY, setLastScrollY] = useState(0)
@@ -17,8 +19,17 @@ export const Navbar = () => {
     const [checkIn, setCheckIn] = useState("")
     const [checkOut, setCheckOut] = useState("")
     const [query, setQuery] = useState("");
+
+    const [isDropdownOn, setIsDropdownOn] = useState(false)
+    const [adult, setAdult] = useState(0)
+    const [children, setChindren] = useState(0)
+    const [infant, setInfant] = useState(0)
+    const [guestData, setGuestData] = useState()
+
     const wrapperRef = useRef(null);
     const navigate = useNavigate()
+    const { updateUserData } = useContext(StoreContext)
+
 
     useEffect(() => {
         const handleScroll = () => {
@@ -44,6 +55,24 @@ export const Navbar = () => {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [])
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+                setIsDropdownOn(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [])
+
+    useEffect(() => {
+        if (adult + children + infant == 0) {
+            setGuestData("Add guests")
+        } else {
+            setGuestData(`Guest ${adult + children + infant}`)
+        }
+    }, [adult, children, infant])
 
     const searchItems = [
         {
@@ -93,13 +122,18 @@ export const Navbar = () => {
         if (query.trim() !== "") {
             const citySlug = query.toLowerCase().replace(/\s+/g, "-");
 
-            const params = new URLSearchParams();
+            updateUserData({
+                destination: query,
+                checkIn: format(checkIn, "yyyy-MM-dd"),
+                checkOut: format(checkOut, "yyyy-MM-dd"),
+                guests: {
+                    adult: adult,
+                    children: children,
+                    infant: infant
+                }
+            });
 
-            if (checkIn) params.append("checkIn", format(checkIn, "yyyy-MM-dd"));
-            if (checkOut) params.append("checkOut", format(checkOut, "yyyy-MM-dd"));
-
-            const queryString = params.toString();
-            navigate(queryString ? `/${citySlug}?${queryString}` : `/${citySlug}`);
+            navigate(citySlug);
         }
     };
 
@@ -208,69 +242,125 @@ export const Navbar = () => {
 
 
             {/* Bottom navbar */}
-            <motion.div className='flex border border-gray-2 shadow-xl z-20  rounded-full w-fit bg-white'
-                animate={{ y: hide ? "-300%" : "0%" }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}>
-                <div className='flex flex-col rounded-full py-3 pl-10 p-2 hover:bg-gray-1'
-                    ref={wrapperRef}>
-                    <label htmlFor="destinations">Where</label>
-                    <input id='destinations' type="text" placeholder='Search Destinations' className='outline-0'
-                        onFocus={() => setSearchSuggestionBox(true)}
-                        onChange={(e) => setQuery(e.target.value)}
-                        value={query}
-                    />
-                </div>
-                <div className='flex flex-col rounded-full py-3 pl-5 p-2 hover:bg-gray-1'>
-                    <label htmlFor='checkin'>Check in</label>
-                    <DatePicker id='checkin'
-                        placeholderText='Add dates'
-                        className='outline-0  w-25'
-                        selected={checkIn}
-                        onChange={(date) => setCheckIn(date)}
-                        dateFormat="dd/MM/yyyy"
+            {
+                location.pathname === "/" && (
+                    <motion.div className='flex border border-gray-2 shadow-xl z-20  rounded-full w-fit bg-white'
+                        animate={{ y: hide ? "-300%" : "0%" }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}>
 
-                    />
-                </div>
-                <div className='flex flex-col rounded-full py-3 pl-5 p-2 hover:bg-gray-1'>
-                    <label htmlFor='checkout'>Check Out</label>
-                    <DatePicker id='checkout'
-                        placeholderText='Add dates'
-                        className='outline-0  w-25'
-                        selected={checkOut}
-                        onChange={(date) => setCheckOut(date)}
-                        dateFormat="dd/MM/yyyy"
-                    />
-                </div>
-                <div className='flex py-3 pl-5 p-2 hover:bg-gray-1 rounded-full'>
-                    <div className='flex flex-col  '>
-                        <label htmlFor="who">Who</label>
-                        <input id='who' placeholder='Add guests' type='text' className='outline-0' />
-                    </div>
-                    <button className='bg-airbnb rounded-full w-11 h-11 flex justify-center items-center cursor-pointer'
-                        onClick={handleSearch}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search-icon lucide-search text-white"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></svg>
-                    </button>
-                </div>
-                <div className={`absolute bg-white max-h-[30rem] w-[25rem] top-40 left-85 rounded-4xl p-6 pt-10 shadow-card overflow-scroll scrollbar-none scrollbar-thin-y ${searchSuggestionBox ? "block" : "hidden"} `}>
-                    {filteredItems.length > 0 ? (
-                        filteredItems.map((item) => (
-                            <div className='cursor-pointer' key={item.id} onMouseDown={() => {
-                                setQuery(item.destination)
-                                setSearchSuggestionBox(false)
-                            }} >
-                                <SearchCards
-                                    destination={item.destination}
-                                    text={item.text}
-                                    img={item.image}
+
+                        <div>
+                            <div className='flex flex-col rounded-full py-3 pl-10 p-2 hover:bg-gray-1'
+                                ref={wrapperRef}>
+                                <label htmlFor="destinations">Where</label>
+                                <input id='destinations' type="text" placeholder='Search Destinations' className='outline-0'
+                                    onFocus={() => setSearchSuggestionBox(true)}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    value={query}
                                 />
                             </div>
-                        ))
-                    ) : (
-                        <p className="text-gray-500">No matches found</p>
-                    )}
-                </div>
-            </motion.div>
+                            <div className={`absolute bg-white max-h-[30rem] w-[25rem]  top-40 left-95 rounded-4xl p-6 pt-10 shadow-card overflow-scroll scrollbar-none scrollbar-thin-y ${searchSuggestionBox ? "block" : "hidden pointer-events-none border "} `}>
+                                {filteredItems.length > 0 ? (
+                                    filteredItems.map((item) => (
+                                        <div className='cursor-pointer' key={item.id} onMouseDown={() => {
+                                            setQuery(item.destination)
+                                            setSearchSuggestionBox(false)
+                                        }} >
+                                            <SearchCards
+                                                destination={item.destination}
+                                                text={item.text}
+                                                img={item.image}
+                                            />
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-gray-500">No matches found</p>
+                                )}
+                            </div>
+                        </div>
+
+
+                        <div className='flex flex-col rounded-full py-3 pl-5 p-2 hover:bg-gray-1'>
+                            <label htmlFor='checkin'>Check in</label>
+                            <DatePicker id='checkin'
+                                placeholderText='Add dates'
+                                className='outline-0  w-25'
+                                selected={checkIn}
+                                onChange={(date) => setCheckIn(date)}
+                                dateFormat="dd/MM/yyyy"
+
+                            />
+                        </div>
+                        <div className='flex flex-col rounded-full py-3 pl-5 p-2 hover:bg-gray-1'>
+                            <label htmlFor='checkout'>Check Out</label>
+                            <DatePicker id='checkout'
+                                placeholderText='Add dates'
+                                className='outline-0  w-25'
+                                selected={checkOut}
+                                onChange={(date) => setCheckOut(date)}
+                                dateFormat="dd/MM/yyyy"
+                            />
+                        </div>
+
+
+                        <div className='flex py-3 pl-5  p-2 hover:bg-gray-1 rounded-full'>
+                            <div className='flex flex-col  '>
+                                <label htmlFor="who">Who</label>
+                                <div onClick={() => setIsDropdownOn(true)} className='w-30 text-[#787878]'>{guestData}</div>
+                            </div>
+                            <button className='bg-airbnb rounded-full w-11 h-11 flex justify-center items-center cursor-pointer'
+                                onClick={handleSearch}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search-icon lucide-search text-white"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></svg>
+                            </button>
+                        </div>
+                        <div className={`  absolute bg-white h-80 w-[21rem] top-40 right-95 z-50 p-5 rounded-xl ${isDropdownOn ? "block" : "hidden pointer-events-none"} shadow-[0_7px_29px_0_rgba(100,100,111,0.2)] `}
+                            ref={wrapperRef}>
+                            <div className='flex justify-between pt-3' >
+                                <div>
+                                    <div className='font-semibold text-lg' >Adults</div>
+                                    <div>Age 13+</div>
+                                </div>
+                                <div className='flex gap-2.5 items-center' >
+                                    <button className='p-2 flex justify-center items-center size-8 border border-gray-600 rounded-full' disabled={children > 0 || infant > 0 ? adult <= 1 : adult <= 0} onClick={() => setAdult((prev => prev - 1))} >-</button>
+                                    <div>{adult}</div>
+                                    <button className='p-2 flex justify-center items-center size-8 border border-gray-600 rounded-full' onClick={() => setAdult((prev => prev + 1))} >+</button>
+                                </div>
+                            </div>
+                            <div className='flex justify-between pt-3' >
+                                <div>
+                                    <div className='font-semibold text-lg' >Children</div>
+                                    <div>Age 2-12</div>
+                                </div>
+                                <div className='flex gap-2.5 items-center' >
+                                    <button className='p-2 flex justify-center items-center size-8 border border-gray-600 rounded-full' disabled={children <= 0} onClick={() => setChindren((prev => prev - 1))} >-</button>
+                                    <div>{children}</div>
+                                    <button className='p-2 flex justify-center items-center size-8 border border-gray-600 rounded-full' disabled={adult == 0} onClick={() => setChindren((prev => prev + 1))} >+</button>
+                                </div>
+                            </div>
+                            <div className='flex justify-between pt-3' >
+                                <div>
+                                    <div className='font-semibold text-lg' >Infants</div>
+                                    <div>Under 2</div>
+                                </div>
+                                <div className='flex gap-2.5 items-center' >
+                                    <button className={`p-2 flex justify-center items-center size-8 border border-gray-600 rounded-full`} disabled={infant <= 0} onClick={() => setInfant((prev => prev - 1))}>-</button>
+                                    <div>{infant}</div>
+                                    <button className='p-2 flex justify-center items-center size-8 border border-gray-600 rounded-full' disabled={adult == 0} onClick={() => { console.log("Hello"); setInfant((prev => prev + 1)) }}>+</button>
+                                </div>
+                            </div>
+                            <p className='py-3 text-gray-600'>Pets are not allowed in this stay</p>
+                            <div className='flex justify-end pt-3' >
+                                <div className='underline font-bold cursor-pointer'
+                                    onClick={() => setIsDropdownOn(false)} >
+                                    Close
+                                </div>
+                            </div>
+                        </div>
+
+                    </motion.div>
+                )
+            }
 
         </div>
 
