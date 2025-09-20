@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Share, Heart, Grip, DoorClosed, MessageCircleHeart, CircleParking, Shell, Wifi, Car, WashingMachine, BellOff, ChevronUp, ChevronDown, AirVent, Tv, Briefcase, CookingPot, BellRing } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import { GuestFavCard } from '../components/utils/GuestFavCard';
@@ -14,17 +14,11 @@ import { calculateDays } from '../components/utils/CalculateDays.js';
 
 const Room = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const { userData } = useContext(StoreContext)
-    console.log("userData: ", userData);
     const { hotels } = useContext(StoreContext)
     const hotel = hotels.hotels.find(hotel => hotel.id === parseInt(id))
-    console.log("hotel: ", hotel);
-
-    const bookingData = JSON.parse(localStorage.getItem("userData") )
-    console.log(bookingData);
-
-
-
+    const bookingData = JSON.parse(localStorage.getItem("userData"))
     const [isChevronUp, setIsChevornUp] = useState(false)
     const [isDropdownOn, setIsDropdownOn] = useState(false)
 
@@ -252,10 +246,6 @@ const Room = () => {
         },
     ];
 
-    
-
-
-
 
     const dropDownMenu = () => {
         setIsChevornUp(!isChevronUp)
@@ -274,7 +264,22 @@ const Room = () => {
     }, []);
 
 
+    const handleReservation = () => {
+        const booking = {
+            destination: bookingData.destination,
+            checkIn: new Date(checkIn).toISOString().split("T")[0],
+            checkOut: new Date(checkOut).toISOString().split("T")[0],
+            adult: adult, 
+            children: children, 
+            infant: infant ,
+            hotelId: id
+        };
+       // Convert object → string (encode for URL)
+        const queryString = new URLSearchParams(booking).toString();
+        console.log("queryString: ", queryString);
+        navigate(`/reservation?${queryString}`)
 
+    }
 
 
     return (
@@ -404,13 +409,36 @@ const Room = () => {
                     <div className='w-2/5 flex justify-end'>
                         <div>
                             <div className='font-medium py-4 px-10 my-5 rounded-xl shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]'>
-                                Rare find! This place is usually booked
+                                <div className='flex justify-center items-center gap-5'>
+
+                                    <svg
+                                        viewBox="0 0 48 48"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        aria-hidden="true"
+                                        role="presentation"
+                                        focusable="false"
+                                        className='h-8'
+                                    >
+                                        <g stroke="none">
+                                            <path
+                                                d="m32.62 6 9.526 11.114-18.146 23.921-18.147-23.921 9.526-11.114z"
+                                                fillOpacity=".2"
+                                            ></path>
+                                            <path
+                                                d="m34.4599349 2 12.8243129 14.9616983-23.2842478 30.6928721-23.28424779-30.6928721 12.82431289-14.9616983zm-17.9171827 16h-12.52799999l18.25899999 24.069zm27.441 0h-12.528l-5.73 24.069zm-14.583 0h-10.802l5.4012478 22.684zm-15.92-12.86-9.30799999 10.86h11.89399999zm19.253-1.141h-17.468l2.857 12.001h11.754zm1.784 1.141-2.586 10.86h11.894z"
+                                            ></path>
+                                        </g>
+                                    </svg>
+                                    <div>
+                                        Rare find! This place is usually booked
+                                    </div>
+                                </div>
                             </div>
 
 
                             {/* Check out form */}
                             <div className='border border-gray-300 p-5 inline-block rounded-xl sticky top-50' >
-                                <div className='text-xl py-5' >{nights == 0? "Add dates to get the price":`₹${nights*hotel.price_per_night}`}</div>
+                                <div className='text-xl py-5' >{nights == 0 ? "Add dates to get the price" : `₹${nights * hotel.price_per_night}`}</div>
                                 <div className=' inline-flex flex-col' >
                                     <div className='flex border-b-0 border border-gray-700 rounded-t-xl' >
                                         <div className='inline-flex flex-col p-3 px-8  border-r-1'>
@@ -443,10 +471,11 @@ const Room = () => {
                                         <div>{isChevronUp ? <ChevronUp /> : <ChevronDown />}</div>
                                     </div>
 
+                                    <button onClick={handleReservation} className='bg-airbnb py-3 rounded-full text-white font-semibold mt-5' >Reserve</button>
 
-                                    <button className='bg-airbnb py-3 rounded-full text-white font-semibold mt-5' >Reserve</button>
+
                                     {/* dropdown menu */}
-                                    <div className={`  absolute bg-white h-80 w-[21rem] top-55 z-10 p-5 rounded-xl ${isDropdownOn ? "block" : "hidden"} shadow-[0_7px_29px_0_rgba(100,100,111,0.2)] `}>
+                                    <div className={`absolute bg-white h-80 w-[21rem] top-55 z-10 p-5 rounded-xl ${isDropdownOn ? "block" : "hidden"} shadow-[0_7px_29px_0_rgba(100,100,111,0.2)] `}>
                                         <div className='flex justify-between pt-3' >
                                             <div>
                                                 <div className='font-semibold text-lg' >Adults</div>
