@@ -20,6 +20,11 @@ const Room = () => {
     const hotel = hotels.hotels.find(hotel => hotel.id === parseInt(id))
     console.log("hotel: ", hotel);
 
+    const bookingData = JSON.parse(localStorage.getItem("userData") )
+    console.log(bookingData);
+
+
+
     const [isChevronUp, setIsChevornUp] = useState(false)
     const [isDropdownOn, setIsDropdownOn] = useState(false)
 
@@ -29,7 +34,6 @@ const Room = () => {
 
     const [checkIn, setCheckIn] = useState("")
     const [checkOut, setCheckOut] = useState("")
-    console.log("checkOut: ", checkOut);
 
     const nights = calculateDays(checkIn, checkOut);
 
@@ -260,14 +264,13 @@ const Room = () => {
 
     useEffect(() => {
         if (userData?.current) {
-            setAdult(userData.current.guests.adult || 1);
-            setChildren(userData.current.guests.children || 0);
-            setInfant(userData.current.guests.infant || 0);
+            setAdult(userData.current.guests.adult || bookingData.guests.adult);
+            setChildren(userData.current.guests.children || bookingData.guests.children);
+            setInfant(userData.current.guests.infant || bookingData.guests.infant);
 
-            setCheckIn(userData.current.checkIn ? new Date(userData.current.checkIn) : null);
-            setCheckOut(userData.current.checkOut ? new Date(userData.current.checkOut) : null);
+            setCheckIn(userData.current.checkIn ? new Date(userData.current.checkIn) : bookingData.checkIn);
+            setCheckOut(userData.current.checkOut ? new Date(userData.current.checkOut) : bookingData.checkOut);
         }
-
     }, []);
 
 
