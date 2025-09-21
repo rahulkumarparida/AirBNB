@@ -438,7 +438,11 @@ const Room = () => {
 
                             {/* Check out form */}
                             <div className='border border-gray-300 p-5 inline-block rounded-xl sticky top-50' >
-                                <div className='text-xl py-5' >{nights == 0 ? "Add dates to get the price" : `₹${nights * hotel.price_per_night}`}</div>
+                            <div className='py-4'> 
+                                <span className='text-xl py-5 font-bold underline' >{nights == 0 ? "Add dates to get the price" : `₹${(nights * hotel.price_per_night).toLocaleString("en-IN")}`}</span>
+                                <span> For {calculateDays(checkIn,checkOut)} nights </span>
+                            </div>
+                                
                                 <div className=' inline-flex flex-col' >
                                     <div className='flex border-b-0 border border-gray-700 rounded-t-xl' >
                                         <div className='inline-flex flex-col p-3 px-8  border-r-1'>
