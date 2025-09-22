@@ -15,8 +15,7 @@ import { calculateDays } from '../components/utils/CalculateDays.js';
 const Room = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { userData } = useContext(StoreContext)
-    const { hotels } = useContext(StoreContext)
+    const { userData, updateUserData ,hotels } = useContext(StoreContext)
     const hotel = hotels.hotels.find(hotel => hotel.id === parseInt(id))
     const bookingData = JSON.parse(localStorage.getItem("userData"))
     const [isChevronUp, setIsChevornUp] = useState(false)
@@ -254,9 +253,9 @@ const Room = () => {
 
     useEffect(() => {
         if (userData?.current) {
-            setAdult(userData.current.guests.adult || bookingData.guests.adult);
-            setChildren(userData.current.guests.children || bookingData.guests.children);
-            setInfant(userData.current.guests.infant || bookingData.guests.infant);
+            setAdult(userData.current.adult || bookingData.adult);
+            setChildren(userData.current.children || bookingData.children);
+            setInfant(userData.current.infant || bookingData.infant);
 
             setCheckIn(userData.current.checkIn ? new Date(userData.current.checkIn) : bookingData.checkIn);
             setCheckOut(userData.current.checkOut ? new Date(userData.current.checkOut) : bookingData.checkOut);
@@ -277,8 +276,8 @@ const Room = () => {
        // Convert object → string (encode for URL)
         const queryString = new URLSearchParams(booking).toString();
         console.log("queryString: ", queryString);
+        updateUserData(booking)
         navigate(`/reservation?${queryString}`)
-
     }
 
 

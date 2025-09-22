@@ -3,6 +3,7 @@ import { Home } from '../pages/Home'
 import Room from '../pages/Room'
 import { SearchResults } from '../pages/SearchResults'
 import { Reservation } from '../pages/Reservation'
+import Confirmation from '../pages/Confirmation'
 
 export const Routing = () => {
     return (
@@ -11,6 +12,7 @@ export const Routing = () => {
             <Route path='/room/:id' element={<Room />} />
             <Route path='/:city' element={<SearchResults />} />
             <Route path='/reservation' element={<Reservation />} />
+            <Route path='/confirmation' element={<Confirmation />} />
         </Routes>
     )
 }

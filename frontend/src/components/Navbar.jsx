@@ -126,11 +126,9 @@ export const Navbar = () => {
                 destination: query,
                 checkIn: format(checkIn, "yyyy-MM-dd"),
                 checkOut: format(checkOut, "yyyy-MM-dd"),
-                guests: {
-                    adult: adult,
-                    children: children,
-                    infant: infant
-                }
+                adult: adult,
+                children: children,
+                infant: infant
             });
 
             navigate(citySlug);

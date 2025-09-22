@@ -8,11 +8,17 @@ const StoreContextProvider = ({ children }) => {
         destination: "",
         checkIn: "",
         checkOut: "",
-        guests: {
-            adult: 0,
-            children: 0,
-            infant: 0
-        }
+        adult: 0,
+        children: 0,
+        infant: 0
+    })
+
+    const bookingDetails = useRef({
+        ...userData.current,
+        cost: 0,
+        tax: 0,
+        totalcost: 0,
+        cancleBy: ""
     })
 
     useEffect(() => {
@@ -22,7 +28,19 @@ const StoreContextProvider = ({ children }) => {
                 userData.current = JSON.parse(savedData);
             } catch (e) {
                 console.error("Failed to parse userData:", e);
-                localStorage.removeItem("userData"); 
+                localStorage.removeItem("userData");
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        const savedData = localStorage.getItem("bookingDetails");
+        if (savedData && savedData !== "undefined" && savedData !== "null") {
+            try {
+                bookingDetails.current = JSON.parse(savedData);
+            } catch (e) {
+                console.error("Failed to parse userData:", e);
+                localStorage.removeItem("bookingDetails");
             }
         }
     }, []);
@@ -33,9 +51,13 @@ const StoreContextProvider = ({ children }) => {
         userData.current = newData;
         localStorage.setItem("userData", JSON.stringify(newData));
     };
+    const updateBookingdetails = (newData) => {
+        bookingDetails.current = newData;
+        localStorage.setItem("bookingDetails", JSON.stringify(newData));
+    };
 
 
-    const value = { hotels, userData, updateUserData }
+    const value = { hotels, userData, updateUserData, bookingDetails, updateBookingdetails }
     return (
         <StoreContext.Provider value={value}>
             {children}

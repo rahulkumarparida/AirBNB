@@ -1,11 +1,39 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Building2, CreditCard } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { StoreContext } from '../context/StoreContext';
+import { calculateDays } from './utils/CalculateDays';
 
-export default function PaymentMethod() {
+export default function PaymentMethod({
+    hotelId,
+    destination,
+    checkIn,
+    checkOut,
+    adult,
+    children,
+    infant
+}) {
     const [selectedMethod, setSelectedMethod] = useState('upi-id');
     const [showUpiIdField, setShowUpiIdField] = useState(true);
     const [showCardFields, setShowCardFields] = useState(false);
     const [showBankSelection, setShowBankSelection] = useState(false);
+    const navigate = useNavigate()
+
+
+    const { hotels, updateBookingdetails, userData } = useContext(StoreContext)
+    const hotel = hotels.hotels.find((h) => h.id == hotelId)
+    console.log("hotel: ", hotel);
+
+
+    const cost = (calculateDays(checkIn, checkOut) * hotel.price_per_night);
+    const tax = cost * 0.18
+    const totalCost = cost + tax
+    const checkInDate = new Date(checkIn);
+    const cancelByDate = new Date(checkInDate);
+    cancelByDate.setDate(checkInDate.getDate() - 1);
+    const cancelByText = `${cancelByDate.getDate()} ${cancelByDate.toLocaleString('default', { month: 'long' })}`;
+
 
     const [formData, setFormData] = useState({
         virtualPaymentAddress: '',
@@ -49,6 +77,67 @@ export default function PaymentMethod() {
             {checked && <div className="w-3 h-3 rounded-full bg-black"></div>}
         </div>
     );
+
+    const handlePayment = () => {
+        let success = false;
+        let message = "";
+
+        switch (selectedMethod) {
+            case "upi-id":
+                if (formData.virtualPaymentAddress.includes("@")) {
+                    success = true;
+                    message = `Payment confirmed via UPI ID (${formData.virtualPaymentAddress})`;
+                } else {
+                    message = "Invalid UPI ID (must contain @)";
+                }
+                break;
+
+            case "upi-qr":
+                // In real app, you’d show QR and scan confirmation
+                success = true;
+                message = "Payment confirmed via UPI QR code";
+                break;
+
+            case "card":
+                if (
+                    formData.cardNumber.replace(/\s+/g, "") === "1212121212121212" &&
+                    formData.cvv === "123" &&
+                    formData.cardholderName.toLowerCase() === "airbnb"
+                ) {
+                    success = true;
+                    message = "Payment confirmed via Card";
+                } else {
+                    message = "Invalid Card Details";
+                }
+                break;
+
+            case "netbanking":
+                // For now assume success (later can add bank selection)
+                success = true;
+                message = "Payment confirmed via Netbanking";
+                break;
+
+            default:
+                message = "Please select a payment method";
+        }
+
+        if (success) {
+            toast.success(message);
+            updateBookingdetails({
+                ...userData.current,
+                cost: cost,
+                tax: tax,
+                totalcost: totalCost,
+                cancleBy: cancelByText
+            })
+            navigate("/confirmation")
+
+        } else {
+            toast.error(message);
+        }
+    };
+
+
 
     return (
         <div className="min-w-lg mx-auto bg-white rounded-2xl shadow-lg p-6 space-y-4">
@@ -180,7 +269,7 @@ export default function PaymentMethod() {
                         Choose your bank
                     </button>
                 ) : (
-                    <button className="w-full bg-gray-800 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-900 transition-colors">
+                    <button onClick={handlePayment} className="w-full bg-gray-800 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-900 transition-colors">
                         Next
                     </button>
                 )}

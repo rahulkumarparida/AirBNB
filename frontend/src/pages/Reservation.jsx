@@ -2,6 +2,8 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { ArrowUp } from 'lucide-react';
 import PaymentMethod from "../components/PaymentMethod";
 import BookingSummaryCard from "../components/BookingSummaryCard";
+import { ToastContainer } from 'react-toastify';
+
 
 
 export const Reservation = () => {
@@ -20,6 +22,7 @@ export const Reservation = () => {
 
     return (
         <div className="px-50">
+            <ToastContainer />
             <div className="text-3xl font-bold text-gray-900 flex items-center gap-6 ">
                 <button onClick={() => navigate(-1)} className="cursor-pointer"><ArrowUp className="rotate-270" /></button>
                 <div>Confirm and pay</div>
@@ -28,7 +31,15 @@ export const Reservation = () => {
 
             <div className="flex justify-between">
                 <div>
-                    <PaymentMethod />
+                    <PaymentMethod
+                        hotelId={hotelID}
+                        destination={destination}
+                        checkIn={checkIn}
+                        checkOut={checkOut}
+                        adult={adult}
+                        children={children}
+                        infant={infant}
+                    />
                 </div>
                 <div>
                     <BookingSummaryCard hotelId={hotelID}
