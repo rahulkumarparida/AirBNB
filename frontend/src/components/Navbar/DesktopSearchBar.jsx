@@ -28,7 +28,6 @@ export const DesktopSearchBar = ({
     deskGuestWrapperRef,
 
 }) => {
-    console.log(deskGuestWrapperRef.current);
     return (
         <motion.div
             className="hidden md:flex border border-gray-2  shadow-xl z-20 rounded-full w-fit bg-white"
