@@ -264,7 +264,7 @@ const Room = () => {
             setCheckIn(userData.current.checkIn ? new Date(userData.current.checkIn) : bookingData.checkIn);
             setCheckOut(userData.current.checkOut ? new Date(userData.current.checkOut) : bookingData.checkOut);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
 
@@ -366,8 +366,7 @@ const Room = () => {
                             <RareFind />
 
                             {/* Check out form */}
-                            <div className='border border-gray-300 p-5 inline-block rounded-xl sticky top-50 
-                w-full md:w-auto md:max-w-lg lg:max-w-md xl:max-w-sm 2xl:max-w-xs' >
+                            <div className='border border-gray-300 p-5 inline-block rounded-xl sticky top-50 w-full md:w-auto md:max-w-lg lg:max-w-md xl:max-w-sm 2xl:max-w-xs' >
                                 <div className='py-4'>
                                     <span className='text-xl py-5 font-bold underline' >{nights == 0 ? "Add dates to get the price" : `₹${(nights * hotel.price_per_night).toLocaleString("en-IN")}`}</span>
                                     <span> For {calculateDays(checkIn, checkOut)} nights </span>

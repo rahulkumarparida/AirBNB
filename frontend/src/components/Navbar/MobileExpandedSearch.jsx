@@ -23,7 +23,7 @@ export const MobileExpandedSearch = ({
     setIsDropdownOn,
     filteredItems,
     searchWrapperRef,
-    guestWrapperRef,
+    mobileGuestWrapperRef,
     handleSearch
 }) => {
     return (
@@ -139,7 +139,7 @@ export const MobileExpandedSearch = ({
 
             {/* Guests Dropdown (Mobile) */}
             {isDropdownOn && (
-                <div className="absolute inset-0 bg-white z-50" ref={guestWrapperRef}>
+                <div className="absolute inset-0 bg-white z-50" ref={mobileGuestWrapperRef}>
                     <div className="p-4 border-b flex justify-between items-center">
                         <button
                             onClick={() => setIsDropdownOn(false)}

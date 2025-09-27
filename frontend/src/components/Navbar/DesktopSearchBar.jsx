@@ -25,10 +25,10 @@ export const DesktopSearchBar = ({
     filteredItems,
     handleSearch,
     searchWrapperRef,
-    guestWrapperRef,
+    deskGuestWrapperRef,
 
 }) => {
-    console.log(searchWrapperRef.current);
+    console.log(deskGuestWrapperRef.current);
     return (
         <motion.div
             className="hidden md:flex border border-gray-2  shadow-xl z-20 rounded-full w-fit bg-white"
@@ -92,16 +92,16 @@ export const DesktopSearchBar = ({
                     className='outline-0 w-25'
                     selected={checkOut}
                     onChange={(date) => setCheckOut(date)}
-                    dateFormat="dd/MM/yyyy" 
+                    dateFormat="dd/MM/yyyy"
                 />
             </div>
 
-            <div className='flex py-3 pl-5 p-2 hover:bg-gray-1 rounded-full' ref={guestWrapperRef}>
+            <div className='flex py-3 pl-5 p-2 hover:bg-gray-1 rounded-full'>
                 <div className='flex flex-col' >
                     <label htmlFor="who">Who</label>
                     <div onClick={() => setIsDropdownOn(true)} className='w-30 text-[#787878]'>{guestData}</div>
                     <div className={`absolute bg-white h-80 w-[21rem] top-40 left-1/2 z-100 p-5 rounded-xl ${isDropdownOn ? "block" : "hidden pointer-events-none"} shadow-[0_7px_29px_0_rgba(100,100,111,0.2)]`} >
-                        <div >
+                        <div ref={deskGuestWrapperRef}>
                             <div className='flex justify-between pt-3'>
                                 <div>
                                     <div className='font-semibold text-lg '>Adults</div>

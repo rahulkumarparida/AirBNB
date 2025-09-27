@@ -27,7 +27,8 @@ export const Navbar = () => {
     const [guestData, setGuestData] = useState()
 
     const searchWrapperRef = useRef(null);
-    const guestWrapperRef = useRef(null);
+    const deskGuestWrapperRef = useRef(null);
+    const mobileGuestWrapperRef = useRef(null);
     const navigate = useNavigate()
     const { updateUserData } = useContext(StoreContext)
 
@@ -59,13 +60,26 @@ export const Navbar = () => {
 
     useEffect(() => {
         function handleClickOutside(event) {
-            if (guestWrapperRef.current && !guestWrapperRef.current.contains(event.target)) {
-                setIsDropdownOn(true);
+            // If the dropdown is open, check if click is inside either ref
+            if (isDropdownOn) {
+                if (deskGuestWrapperRef.current && deskGuestWrapperRef.current.contains(event.target)) {
+                    // Click is inside the desk dropdown, so do nothing
+                    return;
+                }
+                if (mobileGuestWrapperRef.current && mobileGuestWrapperRef.current.contains(event.target)) {
+                    // Click is inside the mobile dropdown, so do nothing
+                    return;
+                }
+                // If we get here, the click is outside both dropdowns, so close the dropdown
+                setIsDropdownOn(false);
             }
         }
+
         document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isDropdownOn]); // Remember to include isDropdownOn in the dependency array
 
 
     useEffect(() => {
@@ -182,7 +196,7 @@ export const Navbar = () => {
                             filteredItems={filteredItems}
                             handleSearch={handleSearch}
                             searchWrapperRef={searchWrapperRef}
-                            guestWrapperRef={guestWrapperRef}
+                            mobileGuestWrapperRef={mobileGuestWrapperRef}
                         />
 
 
@@ -209,7 +223,7 @@ export const Navbar = () => {
                             filteredItems={filteredItems}
                             handleSearch={handleSearch}
                             searchWrapperRef={searchWrapperRef}
-                            guestWrapperRef={guestWrapperRef}
+                            deskGuestWrapperRef={deskGuestWrapperRef}
                         />
                     </>
                 )
