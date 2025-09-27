@@ -21,15 +21,15 @@ export const Reservation = () => {
 
 
     return (
-        <div className="px-50">
+        <div className="md:px-50">
             <ToastContainer />
-            <div className="text-3xl font-bold text-gray-900 flex items-center gap-6 ">
+            <div className="text-3xl font-bold text-gray-900 flex items-center gap-6 py-6 ">
                 <button onClick={() => navigate(-1)} className="cursor-pointer"><ArrowUp className="rotate-270" /></button>
                 <div>Confirm and pay</div>
             </div>
 
 
-            <div className="flex justify-between">
+            <div className="flex justify-center flex-col-reverse gap-6 md:flex-row md:justify-between ">
                 <div>
                     <PaymentMethod
                         hotelId={hotelID}

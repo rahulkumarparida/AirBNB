@@ -136,8 +136,7 @@ export default function PaymentMethod({
 
 
     return (
-        <div className="min-w-lg mx-auto bg-white rounded-2xl shadow-lg p-6 space-y-4">
-            <h1 className="text-xl font-semibold text-gray-900 mb-6">1. Add a payment method</h1>
+        <div className="md:w-lg mx-auto bg-white rounded-2xl shadow-lg p-6 space-y-4">
 
             {/* UPI QR Code */}
             <div
