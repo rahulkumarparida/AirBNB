@@ -75,6 +75,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://airbnbapi-6s4b.onrender.com",
 ]
 
+CORS_ALLOW_ALL_ORIGINS = True
+
 ROOT_URLCONF = 'airbnbapi.urls'
 
 TEMPLATES = [
