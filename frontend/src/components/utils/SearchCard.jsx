@@ -16,9 +16,6 @@ export const SearchCard = ({
 
     const navigate = useNavigate()
     const night = calculateDays(checkIn, checkOut)
-    console.log("night: ", night);
-
-
 
     return (
         <div
@@ -48,7 +45,7 @@ export const SearchCard = ({
                     <p className="font-medium">{hotelName}</p>
                     <span>★{ratings}</span>
                 </div>
-                <p className="text-xs">{`₹${night * price} for ${night} night `}</p>
+                <p className="text-xs">{`₹${(night * price).toLocaleString("en-IN")} for ${night} night `}</p>
                 <p className='text-md'>{`${rooms.bedroom} Bedroom ∙ ${rooms.beds} Bed ∙ ${rooms.bathroom} Bathroom`}</p>
             </div>
         </div>

@@ -25,7 +25,7 @@ export const Card = ({
                     src={image}
                     className="object-cover rounded-2xl w-full h-full"
                 />
-                <div className="absolute top-3 left-3 flex gap-5">
+                <div className="absolute top-3 left-3 flex gap-11">
                     <div className="bg-white font-semibold text-xs rounded-full px-2 py-1">
                         Guest favourite
                     </div>
@@ -36,7 +36,7 @@ export const Card = ({
             </div>
             <div>
                 <p className="font-medium pt-1">{hotelName}</p>
-                <p className="text-xs">{`₹${price} for one night ★ ${ratings}`}</p>
+                <p className="text-xs">{`₹${(price).toLocaleString("en-IN")} for one night ★ ${ratings}`}</p>
             </div>
         </div>
     )
