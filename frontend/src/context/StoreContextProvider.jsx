@@ -128,9 +128,20 @@ const StoreContextProvider = ({ children }) => {
         console.log("User logged out");
     }, []);
 
+    const fetchHotels= async()=>{
+        try {
+            let res = await axiosInstance.get("/api/listings/?offset=10&limit=10")
+            console.log("res: ", res.data.results);
+        } catch (error) {
+            const errMsg = getErrorMessage(error);
+            setAuthError(errMsg);
+        }
+    }
+
     // Combined initialization effect
     useEffect(() => {
         // Load from localStorage
+        fetchHotels()
         const storedAccess = localStorage.getItem("access");
         const storedRefresh = localStorage.getItem("refresh");
         const savedUserData = localStorage.getItem("userData");
