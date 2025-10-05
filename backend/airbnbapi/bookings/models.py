@@ -72,3 +72,4 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.status} {self.amount} for Booking {self.booking_id}"
+    
