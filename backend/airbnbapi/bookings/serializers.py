@@ -113,28 +113,36 @@ class BookingSerializer(serializers.ModelSerializer):
         return obj.nights
 
     def validate(self, attrs):
-        listing = attrs["listing"]
-        check_in = attrs["check_in"]
-        check_out = attrs["check_out"]
+        # For PATCH, keep existing values if not provided
+        instance = getattr(self, 'instance', None)
+        listing = attrs.get("listing") or getattr(instance, "listing", None)
+        check_in = attrs.get("check_in") or getattr(instance, "check_in", None)
+        check_out = attrs.get("check_out") or getattr(instance, "check_out", None)
 
-        if check_in >= check_out:
+        # Run validations only if both dates exist
+        if check_in and check_out and check_in >= check_out:
             raise serializers.ValidationError("check_out must be after check_in.")
 
-        qs = Booking.objects.filter(
-            listing=listing,
-            status__in=[
-                BookingStatus.PENDING,
-                BookingStatus.CONFIRMED,
-                BookingStatus.COMPLETED,
-            ],
-            check_in__lt=check_out,
-            check_out__gt=check_in,
-        )
-        if self.instance:
-            qs = qs.exclude(pk=self.instance.pk)
-        if qs.exists():
-            raise serializers.ValidationError("Those dates are not available.")
+        # Prevent overlapping reservations only for new/updated bookings
+        if listing and check_in and check_out:
+            qs = Booking.objects.filter(
+                listing=listing,
+                status__in=[
+                    BookingStatus.PENDING,
+                    BookingStatus.CONFIRMED,
+                    BookingStatus.COMPLETED,
+                ],
+                check_in__lt=check_out,
+                check_out__gt=check_in,
+            )
+            # exclude self during update
+            if instance:
+                qs = qs.exclude(pk=instance.pk)
+            if qs.exists():
+                raise serializers.ValidationError("Those dates are not available.")
+
         return attrs
+
 
     def create(self, validated_data):
         request = self.context.get("request")
