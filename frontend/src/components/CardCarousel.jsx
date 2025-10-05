@@ -4,7 +4,7 @@ import { useContext, useRef } from 'react'
 import { ScrollButton } from './utils/ScrollButton'
 import { StoreContext } from '../context/StoreContext'
 
-export const CardCarousel = () => {
+export const CardCarousel = ({ destination }) => {
     const { hotels } = useContext(StoreContext)
     console.log("hotels: ", hotels);
 
@@ -39,9 +39,9 @@ export const CardCarousel = () => {
     return (
         <div>
             <div className='flex items-center justify-between'>
-                <Header text="Popular homes in Puri" />
-                {/* Hide scroll buttons when loading */}
-                {hotels.length > 0 && (
+                <Header text={`Popular homes in ${destination}`} />
+                {/* ✅ Safe check for hotels existence */}
+                {hotels && hotels.length > 0 && (
                     <div className='flex gap-3'>
                         <button onClick={scrollLeft} className='rotate-180'>
                             <ScrollButton />
@@ -54,14 +54,13 @@ export const CardCarousel = () => {
             </div>
 
             <div className='flex gap-3 overflow-x-auto scrollbar-none h-70' ref={scrollRef}>
-                {hotels.length === 0 ? (
-                    // Show 4 skeleton cards while loading
+                {/* ✅ Safe check for hotels existence */}
+                {!hotels || hotels.length === 0 ? (
                     Array.from({ length: 8 }).map((_, idx) => (
                         <CardSkeleton key={idx} />
                     ))
                 ) : (
-                    // Show actual cards when data is available
-                    hotels.map((item, idx) => (
+                    hotels.filter(h => h.location.city == destination).map((item, idx) => (
                         <Card
                             key={idx}
                             hotelName={item.title}

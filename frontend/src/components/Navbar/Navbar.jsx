@@ -30,7 +30,7 @@ export const Navbar = () => {
     const deskGuestWrapperRef = useRef(null);
     const mobileGuestWrapperRef = useRef(null);
     const navigate = useNavigate();
-    const { updateUserData } = useContext(StoreContext);
+    const { updateUserData, searchItems } = useContext(StoreContext);
 
 
     useEffect(() => {
@@ -90,45 +90,6 @@ export const Navbar = () => {
         }
     }, [adult, children, infant])
 
-    const searchItems = [
-        {
-            id: 11,
-            destination: "Bhubaneshwar",
-            text: "Capital city with ancient temples and modern luxury",
-            image: "/assets/citysearch.png"
-        },
-        {
-            id: 12,
-            destination: "Mumbai",
-            text: "City of dreams with beaches and Bollywood glamour",
-            image: "/assets/citysearch.png"
-        },
-        {
-            id: 13,
-            destination: "Bengaluru",
-            text: "Garden city and India's Silicon Valley",
-            image: "/assets/citysearch.png"
-        },
-        {
-            id: 14,
-            destination: "Goa",
-            text: "Coastal paradise of sun-kissed beaches, bohemian nightlife, and Portuguese charm",
-            image: "/assets/beachsearch.png"
-        },
-        {
-            id: 15,
-            destination: "Kolkata",
-            text: "India’s Cultural Capital – poetry, history, food, and the ‘City of Joy’ spirit",
-            image: "/assets/citysearch.png"
-        },
-        {
-            id: 16,
-            destination: "Manali",
-            text: "Himalayan haven of snow-clad valleys, adventure, and serene mountain vibes",
-            image: "/assets/mountainsearch.png"
-        }
-
-    ];
 
     const filteredItems = searchItems.filter((item) =>
         item.destination.toLowerCase().includes(query.toLowerCase())

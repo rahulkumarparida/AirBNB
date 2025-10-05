@@ -7,7 +7,6 @@ export default function TopNavbar() {
     const [toggleHamburger, setToggleHamburger] = useState(false);
     const navigate = useNavigate()
     const { user, logout } = useContext(StoreContext)
-    console.log("user: ", user);
 
     return (
         <div className="flex justify-between items-center relative w-full bg-white">
@@ -124,7 +123,7 @@ export default function TopNavbar() {
                                 <p className="font-medium">Profile</p>
                             </div>
                         </div>
-                            <hr className="border-gray-300 my-3" />
+                        <hr className="border-gray-300 my-3" />
                     </div>
 
 

@@ -4,10 +4,50 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import axiosInstance from '../components/utils/axiosInstance.js'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
+import { createSearchItemsFromHotels } from '../components/utils/createSearchItemsFromHotels.jsx'
 
-const StoreContextProvider = ({ children }) => {
+    const StoreContextProvider = ({ children }) => {
     // const hotels = structuredClone(data)
     const [hotels, setHotels] = useState([]);
+    const [searchItems, setSearchItems] = useState([
+        {
+            id: 11,
+            destination: "Bhubaneshwar",
+            text: "Capital city with ancient temples and modern luxury",
+            image: "/assets/citysearch.png"
+        },
+        {
+            id: 12,
+            destination: "Mumbai",
+            text: "City of dreams with beaches and Bollywood glamour",
+            image: "/assets/citysearch.png"
+        },
+        {
+            id: 13,
+            destination: "Bengaluru",
+            text: "Garden city and India's Silicon Valley",
+            image: "/assets/citysearch.png"
+        },
+        {
+            id: 14,
+            destination: "Goa",
+            text: "Coastal paradise of sun-kissed beaches, bohemian nightlife, and Portuguese charm",
+            image: "/assets/beachsearch.png"
+        },
+        {
+            id: 15,
+            destination: "Kolkata",
+            text: "India’s Cultural Capital – poetry, history, food, and the ‘City of Joy’ spirit",
+            image: "/assets/citysearch.png"
+        },
+        {
+            id: 16,
+            destination: "Manali",
+            text: "Himalayan haven of snow-clad valleys, adventure, and serene mountain vibes",
+            image: "/assets/mountainsearch.png"
+        }
+
+    ])
     console.log("hotels: ", hotels);
     const navigate = useNavigate()
 
@@ -133,12 +173,26 @@ const StoreContextProvider = ({ children }) => {
 
     const fetchHotels = async () => {
         try {
-            let res = await axiosInstance.get("/api/listings/")
-            console.log("res: ", res.data.results);
-            setHotels(res.data.results)
+
+            let res = await axiosInstance.get("/api/listings/hotels")
+            
+            if (res && res.data) {
+                console.log("res.data.results: ", res);
+                setHotels(res.data);
+                const dynamicSearchItems = createSearchItemsFromHotels(res.data);
+                setSearchItems(dynamicSearchItems);
+
+                console.log(`✅ Loaded ${res.data.length} hotels and created ${dynamicSearchItems.length} search items`);
+                console.log(`Successfully loaded ${res.data.length} hotels`);
+            } else {
+                console.warn(" No results in response");
+                setHotels([]);
+            }
         } catch (error) {
-            const errMsg = getErrorMessage(error);
-            setAuthError(errMsg);
+            console.error("Error fetching hotels:", error);
+            toast.error("Failed to load hotels");
+        } finally {
+            console.log("Hotels fetch completed");
         }
     }
 
@@ -228,7 +282,8 @@ const StoreContextProvider = ({ children }) => {
         loader,
         authError,
         setAuthError,
-        user
+        user,
+        searchItems
     }
 
     return (
