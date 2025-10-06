@@ -8,6 +8,9 @@ from django.contrib.auth import get_user_model
 
 Users=get_user_model()
 
+
+
+
 class RoomList(models.Model):
     bedroom = models.IntegerField(default=1)
     bathroom = models.IntegerField(default=1)
@@ -37,7 +40,7 @@ class HotelsListing(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     multiple_rooms = models.IntegerField(default=1)
-    rooms = models.ManyToManyField(RoomList,blank=True, related_name="hotels")
+    rooms = models.ManyToManyField(RoomList,blank=True,related_name="hotels")
     location = models.ForeignKey(Location ,blank=True, on_delete=models.CASCADE)
     address = models.TextField()
     price_per_night = models.IntegerField(default=1000)

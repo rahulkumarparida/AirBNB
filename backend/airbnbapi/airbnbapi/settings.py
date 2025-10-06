@@ -8,6 +8,7 @@ import cloudinary.api
 
 
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -19,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-2)a!)xw1bqrt(8nid!)wy@yq@ja6nv7_n+uiu8o6)yiv$!nc(7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [ "airbnbapi-6s4b.onrender.com" ]
 
@@ -119,6 +120,10 @@ cloudinary.config(
     api_key = os.getenv("CLOUD_API_KEY"),
     api_secret = os.getenv("CLOUD_API_SECRET"),
 )
+
+
+
+
 
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
