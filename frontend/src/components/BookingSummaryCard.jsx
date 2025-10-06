@@ -2,6 +2,7 @@ import { Star, Heart } from 'lucide-react';
 import { useContext } from 'react';
 import { StoreContext } from '../context/StoreContext.js';
 import { calculateDays } from './utils/CalculateDays.js';
+import { seededValueInRange } from './utils/seededValueInRange.jsx';
 
 
 // SKELETON COMPONENT
@@ -147,7 +148,6 @@ export default function BookingSummaryCard({
     cancelByDate.setDate(checkInDate.getDate() - 1);
     const cancelByText = `${cancelByDate.getDate()} ${cancelByDate.toLocaleString('default', { month: 'long' })}`;
 
-    const averageRating = 5;
     const guestText = getGuestText(adult, children, infant);
 
 
@@ -173,7 +173,7 @@ export default function BookingSummaryCard({
                     <div className="flex items-center space-x-4 text-sm">
                         <div className="flex items-center space-x-1">
                             <Star className="w-4 h-4 fill-black text-black" />
-                            <span className="font-medium">{averageRating.toFixed(1)}</span>
+                            <span className="font-medium">{seededValueInRange(hotel.price_per_night)}</span>
                             <span className="text-gray-600">(42)</span>
                         </div>
 

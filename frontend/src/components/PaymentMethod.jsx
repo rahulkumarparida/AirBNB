@@ -10,7 +10,7 @@ import { calculateDays } from './utils/CalculateDays';
 const PaymentMethodSkeleton = () => {
     return (
         <div className="md:w-lg mx-auto bg-white rounded-2xl shadow-lg p-6 space-y-4 animate-pulse">
-            
+
             {/* UPI QR Code Skeleton */}
             <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200">
                 <div className="flex items-center space-x-3">
@@ -114,22 +114,22 @@ const RadioButton = ({ checked }) => (
 
 export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
 
-    
+
     const [selectedMethod, setSelectedMethod] = useState('upi-id');
     const [showUpiIdField, setShowUpiIdField] = useState(true);
     const [showCardFields, setShowCardFields] = useState(false);
     const [showBankSelection, setShowBankSelection] = useState(false);
-    
+
     const [formData, setFormData] = useState({
         virtualPaymentAddress: '',
-        cardNumber: '1234 5678 9012 3456',
-        expiration: 'MM/YY',
-        cvv: '3 digits',
-        cardholderName: 'Cardholder name'
+        cardNumber: '',
+        expiration: '',
+        cvv: '',
+        cardholderName: ''
     });
 
     const navigate = useNavigate();
-    const { hotels, updateBookingdetails, userData } = useContext(StoreContext);
+    const { hotels, updateBookingdetails, userData, bookings } = useContext(StoreContext);
     const hotel = hotels.find((h) => h.id == hotelId);
 
 
@@ -142,7 +142,7 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
     const cost = calculateDays(checkIn, checkOut) * hotel.price_per_night;
     const tax = cost * 0.18;
     const totalCost = cost + tax;
-    
+
     const checkInDate = new Date(checkIn);
     const cancelByDate = new Date(checkInDate);
     cancelByDate.setDate(checkInDate.getDate() - 1);
@@ -209,8 +209,14 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
                 cost: cost,
                 tax: tax,
                 totalcost: totalCost,
-                cancleBy: cancelByText
+                cancelBy: cancelByText,
+                PaymentMethod: selectedMethod,
+                ProviderPaymentId: String(
+                    formData.virtualPaymentAddress?.trim() || formData.cardNumber || ""
+                )
+
             });
+            bookings();
             navigate("/confirmation");
         } else {
             toast.error(message);
@@ -272,25 +278,25 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
                         <div className="flex flex-col">
                             <span className="font-medium text-gray-900">Credit or debit card</span>
                             <div className="flex space-x-2 mt-1">
-                                <img 
-                                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'%3E%3Cpath fill='%23005cb2' d='M15 2h18v28H15z'/%3E%3Cpath fill='%23f79e1b' d='M0 2h18v28H0z'/%3E%3C/svg%3E" 
-                                    alt="Visa" 
-                                    className="h-4 w-6" 
+                                <img
+                                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'%3E%3Cpath fill='%23005cb2' d='M15 2h18v28H15z'/%3E%3Cpath fill='%23f79e1b' d='M0 2h18v28H0z'/%3E%3C/svg%3E"
+                                    alt="Visa"
+                                    className="h-4 w-6"
                                 />
-                                <img 
-                                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'%3E%3Cpath fill='%23eb001b' d='M15 2h18v28H15z'/%3E%3Cpath fill='%23ff5f00' d='M27 2h6v28h-6z'/%3E%3C/svg%3E" 
-                                    alt="Mastercard" 
-                                    className="h-4 w-6" 
+                                <img
+                                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'%3E%3Cpath fill='%23eb001b' d='M15 2h18v28H15z'/%3E%3Cpath fill='%23ff5f00' d='M27 2h6v28h-6z'/%3E%3C/svg%3E"
+                                    alt="Mastercard"
+                                    className="h-4 w-6"
                                 />
-                                <img 
-                                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'%3E%3Cpath fill='%230066cc' d='M0 2h48v28H0z'/%3E%3C/svg%3E" 
-                                    alt="American Express" 
-                                    className="h-4 w-6" 
+                                <img
+                                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'%3E%3Cpath fill='%230066cc' d='M0 2h48v28H0z'/%3E%3C/svg%3E"
+                                    alt="American Express"
+                                    className="h-4 w-6"
                                 />
-                                <img 
-                                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'%3E%3Cpath fill='%23003087' d='M0 2h48v28H0z'/%3E%3C/svg%3E" 
-                                    alt="RuPay" 
-                                    className="h-4 w-6" 
+                                <img
+                                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'%3E%3Cpath fill='%23003087' d='M0 2h48v28H0z'/%3E%3C/svg%3E"
+                                    alt="RuPay"
+                                    className="h-4 w-6"
                                 />
                             </div>
                         </div>
@@ -311,6 +317,7 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
                                 type="text"
                                 value={formData.cardNumber}
                                 onChange={(e) => handleInputChange('cardNumber', e.target.value)}
+                                placeholder='Card number'
                                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                             />
                         </div>
@@ -362,8 +369,8 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
                         Choose your bank
                     </button>
                 ) : (
-                    <button 
-                        onClick={handlePayment} 
+                    <button
+                        onClick={handlePayment}
                         className="w-full bg-gray-800 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-900 transition-colors"
                     >
                         Next

@@ -41,13 +41,16 @@ axiosInstance.interceptors.response.use(
 
         // save and update header
         localStorage.setItem("access", newAccess);
-        axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${newAccess}`;
+        axiosInstance.defaults.headers.common["Authorization"] = `AIRBNB ${newAccess}`;
 
         // retry original request
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         console.error("Token refresh failed", refreshError);
-        // optional: force logout user here
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
+        window.location.href = "/login";
+        return Promise.reject(refreshError);
       }
     }
 

@@ -6,7 +6,6 @@ import { StoreContext } from '../context/StoreContext'
 
 export const CardCarousel = ({ destination }) => {
     const { hotels } = useContext(StoreContext)
-    console.log("hotels: ", hotels);
 
     const scrollRef = useRef(null)
     const scrollLeft = () => {
@@ -71,7 +70,7 @@ export const CardCarousel = ({ destination }) => {
                         />
                     ))
                 )}
-            </div>  
+            </div>
         </div>
     )
 }

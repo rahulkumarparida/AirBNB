@@ -6,7 +6,7 @@ import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import { createSearchItemsFromHotels } from '../components/utils/createSearchItemsFromHotels.jsx'
 
-    const StoreContextProvider = ({ children }) => {
+const StoreContextProvider = ({ children }) => {
     // const hotels = structuredClone(data)
     const [hotels, setHotels] = useState([]);
     const [searchItems, setSearchItems] = useState([
@@ -48,7 +48,6 @@ import { createSearchItemsFromHotels } from '../components/utils/createSearchIte
         }
 
     ])
-    console.log("hotels: ", hotels);
     const navigate = useNavigate()
 
     // Auth state
@@ -74,8 +73,10 @@ import { createSearchItemsFromHotels } from '../components/utils/createSearchIte
         cost: 0,
         tax: 0,
         totalcost: 0,
-        cancleBy: ""
+        cancelBy: "",
+        hotelId: 0,
     })
+
 
     // Error message helper
     const getErrorMessage = (error) => {
@@ -175,15 +176,13 @@ import { createSearchItemsFromHotels } from '../components/utils/createSearchIte
         try {
 
             let res = await axiosInstance.get("/api/listings/hotels")
-            
+
             if (res && res.data) {
-                console.log("res.data.results: ", res);
+
                 setHotels(res.data);
                 const dynamicSearchItems = createSearchItemsFromHotels(res.data);
                 setSearchItems(dynamicSearchItems);
 
-                console.log(`✅ Loaded ${res.data.length} hotels and created ${dynamicSearchItems.length} search items`);
-                console.log(`Successfully loaded ${res.data.length} hotels`);
             } else {
                 console.warn(" No results in response");
                 setHotels([]);
@@ -195,6 +194,40 @@ import { createSearchItemsFromHotels } from '../components/utils/createSearchIte
             console.log("Hotels fetch completed");
         }
     }
+
+    const bookings = async () => {
+        console.log("Test Started");
+
+        const payload = {
+            "listing": bookingDetails.current.hotelId,
+            "check_in": bookingDetails.current.checkIn,
+            "check_out": bookingDetails.current.checkOut,
+            "adult": bookingDetails.current.adult,
+            "children": bookingDetails.current.children,
+            "infant": bookingDetails.current.infant,
+            "total_price": bookingDetails.current.cost
+        }
+        
+        const PaymentPayload = {
+            "payment":
+            {
+                "status": "paid",
+                "payment_method": bookingDetails.current.PaymentMethod,
+                "provider_payment_id": bookingDetails.current.ProviderPaymentId
+            }
+        }
+        try {
+            console.log("payload: ", payload);
+            const res = await axiosInstance.post("/api/bookings/", payload)
+            console.log("res: ", res);
+            // const paymentRes = await axiosInstance.patch(`/api/bookings/payments/${res.data.id}`, PaymentPayload)
+            // console.log("paymentRes: ", paymentRes);
+        } catch (error) {
+            console.log("error: ", error);
+
+        }
+    }
+
 
     // Combined initialization effect
     useEffect(() => {
@@ -283,7 +316,8 @@ import { createSearchItemsFromHotels } from '../components/utils/createSearchIte
         authError,
         setAuthError,
         user,
-        searchItems
+        searchItems,
+        bookings
     }
 
     return (

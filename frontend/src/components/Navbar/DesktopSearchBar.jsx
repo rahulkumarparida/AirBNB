@@ -48,7 +48,7 @@ export const DesktopSearchBar = ({
                             onChange={(e) => setQuery(e.target.value)}
                             value={query}
                         /><span className={query?.trim().length ? "block" : "hidden"} onClick={() => setQuery("")} >
-                            <X className="size-4" />
+                            <X className="size-4 cursor-pointer" />
                         </span>
                     </div>
                 </div>
