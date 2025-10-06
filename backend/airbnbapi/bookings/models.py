@@ -16,8 +16,11 @@ class Booking(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name="bookings",)
     check_in = models.DateField()
     check_out = models.DateField()
-    guests = models.PositiveIntegerField(default=1)
-
+    
+    
+    adult = models.PositiveIntegerField(default=1)
+    children = models.PositiveIntegerField(default=0)
+    infant = models.PositiveIntegerField(default=0)
 
     # Calculated server-side (nights × listing.price_per_night)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
