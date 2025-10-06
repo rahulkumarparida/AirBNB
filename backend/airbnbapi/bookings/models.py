@@ -16,8 +16,11 @@ class Booking(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name="bookings",)
     check_in = models.DateField()
     check_out = models.DateField()
-    guests = models.PositiveIntegerField(default=1)
-
+    
+    
+    adult = models.PositiveIntegerField(default=1)
+    children = models.PositiveIntegerField(default=0)
+    infant = models.PositiveIntegerField(default=0)
 
     # Calculated server-side (nights × listing.price_per_night)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -53,15 +56,15 @@ class PaymentStatus(models.TextChoices):
 
 class PaymentMethod(models.TextChoices):
     CARD = "card", "Card"
-    UPI = "upi", "UPI"
-    PAYPAL = "paypal", "PayPal"
-    OTHER = "other", "Other"
+    UPIID = "upiID", "UPIID"
+    UPIQR = "upiQR", "UPIQR"
+    NETBANKING = "netbanking", "NETBANKING"
 
 class Payment(models.Model):
     booking = models.OneToOneField("Booking", on_delete=models.CASCADE, related_name="payment")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=10, choices=PaymentStatus.choices, default=PaymentStatus.PENDING)
-    payment_method = models.CharField( max_length=10, choices=PaymentMethod.choices)
+    payment_method = models.CharField( max_length=11, choices=PaymentMethod.choices)
     provider_payment_id  = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -72,3 +75,4 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.status} {self.amount} for Booking {self.booking_id}"
+    
