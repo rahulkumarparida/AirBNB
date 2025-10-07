@@ -22,7 +22,6 @@ const Room = () => {
     const navigate = useNavigate();
     const { userData, updateUserData, hotels } = useContext(StoreContext)
     const hotel = hotels.find(hotel => hotel.id === parseInt(id))
-    console.log("hotel: ", hotel);
     const bookingData = JSON.parse(localStorage.getItem("userData"))
     const [isChevronUp, setIsChevornUp] = useState(false)
     const [isDropdownOn, setIsDropdownOn] = useState(false)

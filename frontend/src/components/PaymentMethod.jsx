@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { StoreContext } from '../context/StoreContext';
 import { calculateDays } from './utils/CalculateDays';
+import Loader from './utils/Loader';
 
 
 
@@ -115,10 +116,11 @@ const RadioButton = ({ checked }) => (
 export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
 
 
-    const [selectedMethod, setSelectedMethod] = useState('upi-id');
+    const [selectedMethod, setSelectedMethod] = useState('upiID');
     const [showUpiIdField, setShowUpiIdField] = useState(true);
     const [showCardFields, setShowCardFields] = useState(false);
     const [showBankSelection, setShowBankSelection] = useState(false);
+    const [loading, setLoading] = useState(false)
 
     const [formData, setFormData] = useState({
         virtualPaymentAddress: '',
@@ -152,7 +154,7 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
 
     const handleMethodChange = (method) => {
         setSelectedMethod(method);
-        setShowUpiIdField(method === 'upi-id');
+        setShowUpiIdField(method === 'upiID');
         setShowCardFields(method === 'card');
         setShowBankSelection(method === 'netbanking');
     };
@@ -161,12 +163,12 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const handlePayment = () => {
+    const handlePayment = async () => {
         let success = false;
         let message = "";
 
         switch (selectedMethod) {
-            case "upi-id":
+            case "upiID":
                 if (formData.virtualPaymentAddress.includes("@")) {
                     success = true;
                     message = `Payment confirmed via UPI ID (${formData.virtualPaymentAddress})`;
@@ -175,7 +177,7 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
                 }
                 break;
 
-            case "upi-qr":
+            case "upiQR":
                 success = true;
                 message = "Payment confirmed via UPI QR code";
                 break;
@@ -203,7 +205,7 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
         }
 
         if (success) {
-            toast.success(message);
+            setLoading(true)
             updateBookingdetails({
                 ...userData.current,
                 cost: cost,
@@ -216,10 +218,18 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
                 )
 
             });
-            bookings();
-            navigate("/confirmation");
+            const res = await bookings();
+            console.log("res: ", res);
+            if (res == true) {
+                navigate("/confirmation");
+            } else {
+                toast("Something went wrong!")
+            }
+            setLoading(false)
+
         } else {
             toast.error(message);
+            setLoading(false)
         }
     };
 
@@ -229,26 +239,26 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
             {/* UPI QR CODE */}
             <div
                 className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer"
-                onClick={() => handleMethodChange('upi-qr')}
+                onClick={() => handleMethodChange('upiQR')}
             >
                 <div className="flex items-center space-x-3">
                     <UPIIcon />
                     <span className="font-medium text-gray-900">UPI QR code</span>
                 </div>
-                <RadioButton checked={selectedMethod === 'upi-qr'} />
+                <RadioButton checked={selectedMethod === 'upiQR'} />
             </div>
 
             {/* UPI ID */}
             <div className="space-y-3">
                 <div
                     className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer"
-                    onClick={() => handleMethodChange('upi-id')}
+                    onClick={() => handleMethodChange('upiID')}
                 >
                     <div className="flex items-center space-x-3">
                         <UPIIcon />
                         <span className="font-medium text-gray-900">UPI ID</span>
                     </div>
-                    <RadioButton checked={selectedMethod === 'upi-id'} />
+                    <RadioButton checked={selectedMethod === 'upiId'} />
                 </div>
 
                 {showUpiIdField && (
@@ -373,7 +383,7 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
                         onClick={handlePayment}
                         className="w-full bg-gray-800 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-900 transition-colors"
                     >
-                        Next
+                        {loading ? <Loader size={20} /> : "Next"}
                     </button>
                 )}
             </div>

@@ -207,21 +207,42 @@ const StoreContextProvider = ({ children }) => {
             "infant": bookingDetails.current.infant,
             "total_price": bookingDetails.current.cost
         }
-        
+
         const PaymentPayload = {
-            "payment":
-            {
+            "payment": {
                 "status": "paid",
                 "payment_method": bookingDetails.current.PaymentMethod,
-                "provider_payment_id": bookingDetails.current.ProviderPaymentId
+                "provider_payment_id": ""
             }
         }
+
         try {
-            console.log("payload: ", payload);
+            console.log("payload: ", PaymentPayload);
+
+            // Step 1: Create booking
             const res = await axiosInstance.post("/api/bookings/", payload)
             console.log("res: ", res);
-            // const paymentRes = await axiosInstance.patch(`/api/bookings/payments/${res.data.id}`, PaymentPayload)
-            // console.log("paymentRes: ", paymentRes);
+
+            // Step 2: Wait 2 seconds and process payment
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Step 3: Update payment status
+            const paymentRes = await axiosInstance.patch(`/api/bookings/${res.data.id}`, PaymentPayload)
+            console.log("paymentRes: ", paymentRes);
+
+            // Both booking and payment were successful
+            return true;
+
+        } catch (error) {
+            console.log("error: ", error);
+            return false;
+        }
+    }
+
+    const myBookings = async () => {
+        try {
+            const res = await axiosInstance.get("/api/bookings")
+            console.log("res: ", res);
         } catch (error) {
             console.log("error: ", error);
 
@@ -317,7 +338,8 @@ const StoreContextProvider = ({ children }) => {
         setAuthError,
         user,
         searchItems,
-        bookings
+        bookings,
+        myBookings
     }
 
     return (
