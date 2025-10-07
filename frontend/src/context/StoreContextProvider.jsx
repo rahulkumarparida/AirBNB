@@ -218,21 +218,10 @@ const StoreContextProvider = ({ children }) => {
 
         try {
             console.log("payload: ", PaymentPayload);
-
-            // Step 1: Create booking
             const res = await axiosInstance.post("/api/bookings/", payload)
-            console.log("res: ", res);
-
-            // Step 2: Wait 2 seconds and process payment
             await new Promise(resolve => setTimeout(resolve, 2000));
-
-            // Step 3: Update payment status
-            const paymentRes = await axiosInstance.patch(`/api/bookings/${res.data.id}`, PaymentPayload)
-            console.log("paymentRes: ", paymentRes);
-
-            // Both booking and payment were successful
+            await axiosInstance.patch(`/api/bookings/${res.data.id}`, PaymentPayload)
             return true;
-
         } catch (error) {
             console.log("error: ", error);
             return false;
@@ -241,14 +230,36 @@ const StoreContextProvider = ({ children }) => {
 
     const myBookings = async () => {
         try {
-            const res = await axiosInstance.get("/api/bookings")
+            const res = await axiosInstance.get("/api/bookings");
             console.log("res: ", res);
+
+            // Extract the bookings array from the nested response structure
+            const bookings = res.data?.results;
+
+            // Check if bookings array exists and has items
+            if (bookings && bookings.length > 0) {
+                return bookings; // Return array of hotel bookings
+            } else {
+                return "There are no trips"; // Return message for empty results
+            }
+
         } catch (error) {
-            console.log("error: ", error);
-
+            // Comprehensive error handling based on Axios documentation
+            if (error.response) {
+                // Server responded with error status (4xx, 5xx)
+                console.error("Server Error:", error.response.status, error.response.data);
+                throw new Error(`Request failed: ${error.response.status} - ${error.response.data?.message || 'Server error'}`);
+            } else if (error.request) {
+                // Request made but no response received
+                console.error("Network Error:", error.request);
+                throw new Error("Network error - unable to reach server");
+            } else {
+                // Something else happened while setting up the request
+                console.error("Request Setup Error:", error.message);
+                throw new Error(`Request failed: ${error.message}`);
+            }
         }
-    }
-
+    };
 
     // Combined initialization effect
     useEffect(() => {

@@ -95,7 +95,7 @@ export default function TopNavbar() {
                                 </svg>
                             </div>
                             <div>
-                                <p className="font-medium">Trips</p>
+                                <p onClick={() => navigate("/trips")} className="font-medium">Trips</p>
                             </div>
                         </div>
 

@@ -5,6 +5,7 @@ import { SearchResults } from '../pages/SearchResults'
 import { Reservation } from '../pages/Reservation'
 import Confirmation from '../pages/Confirmation'
 import Auth from '../pages/Auth'
+import Trips from '../pages/Trips'
 
 export const Routing = () => {
     return (
@@ -15,6 +16,7 @@ export const Routing = () => {
             <Route path='/reservation' element={<Reservation />} />
             <Route path='/confirmation' element={<Confirmation />} />
             <Route path='/auth' element={<Auth />} />
+            <Route path='/trips' element={<Trips />} />
         </Routes>
     )
 }
