@@ -221,7 +221,6 @@ export const Profile = () => {
                         {[
                             { id: 'trips', label: 'Trips', count: trips?.length },
                             { id: 'favorites', label: 'Favorites', count: mockFavorites.length },
-                            { id: 'account', label: 'Account' }
                         ].map((tab) => (
                             <button
                                 key={tab.id}
