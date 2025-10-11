@@ -40,6 +40,13 @@ class ListingListCreateView(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["location" , "title" , "price_per_night"]
     
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        role = self.request.query_params.get('role')
+        
+        if role == 'host' and self.request.user.is_authenticated:
+            queryset = queryset.filter(host_id=self.request.user)
+        return queryset
     
     
     def perform_create(self, serializer):
