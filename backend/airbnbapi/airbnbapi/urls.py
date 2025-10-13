@@ -2,11 +2,26 @@
 from django.contrib import admin
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from users.views import home
+from .views import AdminListingsViewset , AdminUserViewset
 from django.urls import path , include
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+
+admin_listings = AdminListingsViewset.as_view({
+    'get': 'list',
+    'post': 'create',
+    'put': 'update',
+    'delete': 'destroy',
+})
+
+admin_users = AdminUserViewset.as_view({
+    'get': 'list',
+    'post': 'create',
+    'put': 'update',
+    'delete': 'destroy',
+})
 
 urlpatterns = [
     path("", home), 
@@ -24,6 +39,11 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
+
+
+    # Admin Access Paths
+    path('api/admin/listings/', admin_listings , name="admin_listing_view"),
+    path('api/admin/users/', admin_users , name="admin_users_view"),
 
     # Docs API
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'), # This one Downloads the YAML file to you local device
