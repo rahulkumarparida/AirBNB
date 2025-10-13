@@ -8,6 +8,7 @@ import Auth from '../pages/Auth'
 import Trips from '../pages/Trips'
 import { Profile } from '../pages/Profile'
 import { Host } from '../pages/Host'
+import { TripDetails } from '../pages/TripDetails'
 
 export const Routing = () => {
     return (
@@ -19,6 +20,7 @@ export const Routing = () => {
             <Route path='/confirmation' element={<Confirmation />} />
             <Route path='/auth' element={<Auth />} />
             <Route path='/trips' element={<Trips />} />
+            <Route path='/trips/details/:bookingId' element={<TripDetails />} />
             <Route path='/profile' element={<Profile />} />
             <Route path='/host' element={<Host />} />
         </Routes>

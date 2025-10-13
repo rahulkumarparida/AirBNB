@@ -3,11 +3,13 @@ import { StoreContext } from "../../context/StoreContext";
 import axiosInstance from "../utils/axiosInstance";
 import { toast } from "react-toastify";
 import Loader from "../utils/Loader";
+import { useNavigate } from "react-router-dom";
 
 export const TripCard = ({ booking }) => {
     const { listing_info, check_in, check_out, nights, payment, adult, children, infant, id } = booking;
     const { hotels, myBookings } = useContext(StoreContext);
     const [loading, setLoading] = useState(false)
+    const navigate = useNavigate()
 
     let image = hotels.find(h => h.id == listing_info.id);
 
@@ -123,11 +125,20 @@ export const TripCard = ({ booking }) => {
 
 
                             <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-                                <button className="w-full px-4 py-2 border border-black rounded-lg text-sm font-medium text-black hover:bg-gray-1 transition-colors sm:w-auto">
+                                <button onClick={() => navigate(`/trips/details/${listing_info.id}`, { state: { booking } })} className="w-full px-4 py-2 border border-black rounded-lg text-sm font-medium text-black hover:bg-gray-1 transition-colors sm:w-auto">
                                     View details
                                 </button>
-                                <button onClick={() => deleteBooking(id)} className="w-full px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-800 transition-colors sm:w-auto cursor-pointer">
-                                    {loading ? (<Loader size={20} />) : "Cancle"}
+                                <button
+                                    disabled={status === "Completed" || loading}
+                                    onClick={() => deleteBooking(id)}
+                                    className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors sm:w-auto ${status === "Completed"
+                                        ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                                        : loading
+                                            ? "bg-red-400 text-white cursor-wait"
+                                            : "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+                                        }`}
+                                >
+                                    {loading ? <Loader size={20} /> : "Cancel"}
                                 </button>
                             </div>
                         </div>
