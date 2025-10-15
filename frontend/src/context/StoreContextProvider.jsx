@@ -11,7 +11,6 @@ const StoreContextProvider = ({ children }) => {
     const [hotels, setHotels] = useState([]);
     const [trips, setTrips] = useState(null);
     const [tripLoading, setTripLoading] = useState(true)
-    console.log("hotels: ", hotels);
     const [searchItems, setSearchItems] = useState([
         {
             id: 11,
@@ -59,7 +58,6 @@ const StoreContextProvider = ({ children }) => {
     const [loader, setLoader] = useState(false);
     const [authError, setAuthError] = useState(null);
     const [user, setUser] = useState(null)
-    console.log("user: ", user);
 
     const userData = useRef({
         destination: "",
@@ -122,10 +120,9 @@ const StoreContextProvider = ({ children }) => {
         try {
             setLoader(true);
             setAuthError(null);
-            let res = await axiosInstance.post('/api/auth/register/', credential);
+            await axiosInstance.post('/api/auth/register/', credential);
             setLoader(false);
             toast.success("Registration Successful!");
-            console.log(res.data);
         } catch (error) {
             setLoader(false);
             const errMsg = getErrorMessage(error);
@@ -151,7 +148,6 @@ const StoreContextProvider = ({ children }) => {
             setLoader(false);
             toast.success("Login Successful!");
             navigate(-1)
-            console.log("Login successful:", res.data);
 
         } catch (error) {
             setLoader(false);
@@ -197,7 +193,6 @@ const StoreContextProvider = ({ children }) => {
     }
 
     const bookings = async () => {
-        console.log("Test Started");
 
         const payload = {
             "listing": bookingDetails.current.hotelId,
@@ -218,7 +213,6 @@ const StoreContextProvider = ({ children }) => {
         }
 
         try {
-            console.log("payload: ", PaymentPayload);
             const res = await axiosInstance.post("/api/bookings/", payload)
             await new Promise(resolve => setTimeout(resolve, 2000));
             await axiosInstance.patch(`/api/bookings/${res.data.id}`, PaymentPayload)

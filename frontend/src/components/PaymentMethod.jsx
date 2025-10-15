@@ -161,9 +161,7 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
     };
 
     const handlePayment = async () => {
-        console.log("hello")
         if (user == null) {
-            console.log(user)
             toast("Please Login")
             navigate("/auth")
         }
@@ -222,7 +220,6 @@ export default function PaymentMethod({ hotelId, checkIn, checkOut }) {
 
             });
             const res = await bookings();
-            console.log("res: ", res);
             if (res == true) {
                 navigate("/confirmation");
             } else {

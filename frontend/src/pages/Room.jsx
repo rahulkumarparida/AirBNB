@@ -281,7 +281,6 @@ const Room = () => {
         };
         // Convert object → string (encode for URL)
         const queryString = new URLSearchParams(booking).toString();
-        console.log("queryString: ", queryString);
         updateUserData(booking)
         navigate(`/reservation?${queryString}`)
     }

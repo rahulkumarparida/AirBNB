@@ -49,7 +49,6 @@ export const Host = () => {
         try {
             setLoading(true);
             const response = await axiosInstance.get('/api/listings/?role=host');
-            console.log("response: ", response.data.results);
             setListings(response.data.results || []);
         } catch (error) {
             console.error('Error fetching listings:', error);
@@ -150,10 +149,8 @@ export const Host = () => {
             setLoading(true);
             const response = await axiosInstance.post('/api/listings/', formData);
             setListingId(response.data.id)
-            console.log("Listing Uploaded ", response);
             toast.success('Listing created successfully!');
             setCurrentFlow('image-upload');
-            console.log("Listing ID: ", response.data.id);
             return response.data.id;
         } catch (error) {
             toast.error('Failed to create listing. Please try again.');
@@ -208,7 +205,7 @@ export const Host = () => {
                     }
                 });
 
-                console.log("Image uploaded: ", response);
+                
                 return response.data;
             });
 
@@ -430,8 +427,8 @@ export const Host = () => {
                                     <div key={stepNum} className="flex items-center">
                                         <div
                                             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${formStep >= stepNum
-                                                    ? 'bg-[#FF385C] text-white'
-                                                    : 'bg-gray-200 text-gray-600'
+                                                ? 'bg-[#FF385C] text-white'
+                                                : 'bg-gray-200 text-gray-600'
                                                 }`}
                                         >
                                             {stepNum}
@@ -498,8 +495,8 @@ export const Host = () => {
                                             handleInputChange('rooms', [{ bedroom: 1, bathroom: 1, beds: 1, guest: 1 }]);
                                         }}
                                         className={`px-6 py-3 border rounded-lg font-medium ${formData.multiple_rooms === 1
-                                                ? 'border-[#FF385C] bg-red-50 text-[#FF385C]'
-                                                : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                                            ? 'border-[#FF385C] bg-red-50 text-[#FF385C]'
+                                            : 'border-gray-300 text-gray-700 hover:border-gray-400'
                                             }`}
                                     >
                                         Yes
@@ -510,8 +507,8 @@ export const Host = () => {
                                             handleInputChange('rooms', [{ bedroom: 1, bathroom: 1, beds: 1, guest: 1 }]);
                                         }}
                                         className={`px-6 py-3 border rounded-lg font-medium ${formData.multiple_rooms === 0
-                                                ? 'border-[#FF385C] bg-red-50 text-[#FF385C]'
-                                                : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                                            ? 'border-[#FF385C] bg-red-50 text-[#FF385C]'
+                                            : 'border-gray-300 text-gray-700 hover:border-gray-400'
                                             }`}
                                     >
                                         No

@@ -140,7 +140,7 @@ export const DesktopSearchBar = ({
                                 <div className='flex gap-2.5 items-center'>
                                     <button className={`p-2 flex justify-center items-center size-8 border border-gray-600 rounded-full`} disabled={infant <= 0} onClick={() => setInfant((prev => prev - 1))}>-</button>
                                     <div>{infant}</div>
-                                    <button className='p-2 flex justify-center items-center size-8 border border-gray-600 rounded-full' disabled={adult == 0} onClick={() => { console.log("Hello"); setInfant((prev => prev + 1)) }}>+</button>
+                                    <button className='p-2 flex justify-center items-center size-8 border border-gray-600 rounded-full' disabled={adult == 0} onClick={() => { setInfant((prev => prev + 1)) }}>+</button>
                                 </div>
                             </div>
                             <p className='py-3 text-gray-600'>Pets are not allowed in this stay</p>
