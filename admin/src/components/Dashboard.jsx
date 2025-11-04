@@ -4,7 +4,7 @@ import { StoreContext } from "../context/StoreContext";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { users, userLoading } = useContext(StoreContext);
+  const { users,setUsers,  userLoading, deleteUser } = useContext(StoreContext);
   
 
   // Local state
@@ -31,7 +31,6 @@ export default function Dashboard() {
   }), [users, listings]);
 
   useEffect(() => {
-    // Simulate fetching listings
     handleFetchListings();
   }, []);
 
@@ -45,24 +44,18 @@ export default function Dashboard() {
     }, 800);
   }
 
-  function handleDeleteUser(id) {
-    setLoading(true);
-    setTimeout(() => {
-      // In real implementation, call API to delete user
-      setMessage(`User ${id} deleted successfully`);
-      setLoading(false);
-      clearMessageAfter();
-    }, 600);
+  async function handleDeleteUser(id) {
+    await deleteUser(id)
+    setUsers(prev => prev.filter(u => u.id !== id ))
+    
   }
 
-  function handleDeleteListing(id) {
-    setLoading(true);
-    setTimeout(() => {
+  async function handleDeleteListing(id)  {
+      setLoading(true);
       setListings(prev => prev.filter(l => l.id !== id));
       setLoading(false);
       setMessage("Listing deleted successfully");
       clearMessageAfter();
-    }, 600);
   }
 
   function clearMessageAfter(time = 3000) {
@@ -119,7 +112,7 @@ export default function Dashboard() {
               A
             </div>
             <div>
-              <div className="text-lg font-bold text-gray-800">Apex Admin</div>
+              <div className="text-lg font-bold text-gray-800">Admin</div>
               <div className="text-xs text-gray-500">Airbnb-style management</div>
             </div>
           </div>
@@ -478,15 +471,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Loading Overlay */}
-      {isLoading && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/20 backdrop-blur-sm pointer-events-none">
-          <div className="bg-white rounded-2xl p-6 shadow-2xl flex items-center space-x-3">
-            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-gray-700 font-medium">Processing...</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

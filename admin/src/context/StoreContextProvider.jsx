@@ -48,13 +48,14 @@ export const StoreContextProvider = ({ children }) => {
     //     }
     // }
 
-    const deleteUser = async (userId) =>{
+    const deleteUser = async (userId) => {
         try {
-            let res = axiosInstance.delete(`/api/admin/users/${userId}`)
+            console.log("Delete user inititated");
+            await axiosInstance.delete(`/api/admin/users/${userId}`)
             fetchUsers()
         } catch (error) {
-            console.log("error: ", error);
-            
+            console.log("error deleting user: ", error);
+
         }
     }
 
@@ -67,6 +68,7 @@ export const StoreContextProvider = ({ children }) => {
         login,
         loginError,
         users,
+        setUsers,
         userLoading,
         deleteUser
 
