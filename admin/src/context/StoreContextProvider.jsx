@@ -52,10 +52,8 @@ export const StoreContextProvider = ({ children }) => {
         try {
             console.log("Delete user inititated");
             await axiosInstance.delete(`/api/admin/users/${userId}`)
-            fetchUsers()
         } catch (error) {
             console.log("error deleting user: ", error);
-
         }
     }
 

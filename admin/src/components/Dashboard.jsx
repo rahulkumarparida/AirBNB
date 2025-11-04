@@ -45,9 +45,8 @@ export default function Dashboard() {
   }
 
   async function handleDeleteUser(id) {
-    await deleteUser(id)
     setUsers(prev => prev.filter(u => u.id !== id ))
-    
+    await deleteUser(id)
   }
 
   async function handleDeleteListing(id)  {
@@ -113,7 +112,7 @@ export default function Dashboard() {
             </div>
             <div>
               <div className="text-lg font-bold text-gray-800">Admin</div>
-              <div className="text-xs text-gray-500">Airbnb-style management</div>
+              <div className="text-xs text-gray-500">Airbnb management</div>
             </div>
           </div>
 
@@ -199,7 +198,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {isLoading ? (
+                  {userLoading ? (
                     // Compact shimmer effect for loading
                     Array.from({ length: 6 }).map((_, index) => (
                       <tr key={index} className="animate-pulse">
