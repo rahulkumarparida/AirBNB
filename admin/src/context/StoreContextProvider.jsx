@@ -4,8 +4,22 @@ import { useEffect, useState } from "react";
 
 export const StoreContextProvider = ({ children }) => {
     const [users, setUsers] = useState([])
+    const [totalUser, setTotalUser] = useState(0)
     const [userLoading, setUserLoading] = useState(false)
     const [loginError, setLoginError] = useState()
+
+    // User infinite scroll states
+    const [userNextPage, setUserNextPage] = useState(null);
+    const [isLoadingMoreUsers, setIsLoadingMoreUsers] = useState(false);
+    const [hasMoreUsers, setHasMoreUsers] = useState(true);
+
+    const [listings, setListings] = useState([])
+    const [totalListings, setTotalListings] = useState(0)
+
+    // Listing infinite scroll states
+    const [nextPage, setNextPage] = useState(null);
+    const [isLoadingMoreListings, setIsLoadingMoreListings] = useState(false);
+    const [hasMoreListings, setHasMoreListings] = useState(true);
 
     const login = (email, password) => {
         console.log("password: ", password);
@@ -22,12 +36,15 @@ export const StoreContextProvider = ({ children }) => {
     const fetchUsers = async () => {
         try {
             setUserLoading(true)
-            let res = await axiosInstance.get("/api/admin/users")
+            let res = await axiosInstance.get("/api/admin/users/?limit=10&offset=0")
             if (!res.data.results) {
                 setUserLoading(false)
                 throw new Error("Users data not found");
             }
             setUsers(res.data.results)
+            setTotalUser(res.data.count)
+            setUserNextPage(res.data.next);
+            setHasMoreUsers(!!res.data.next);
             setUserLoading(false)
         } catch (error) {
             console.log("error: ", error);
@@ -35,18 +52,26 @@ export const StoreContextProvider = ({ children }) => {
         }
     }
 
-    // const fetchUsersById = async (userId) => {
-    //     try {
+    // Fetch more users when user scrolls to bottom
+    const fetchMoreUsers = async () => {
+        if (!userNextPage || isLoadingMoreUsers || !hasMoreUsers) return;
 
-    //         let res = await axiosInstance.get(`//api/admin/users/${userId}`)
-    //         if (!res.data.results) {
-    //             throw new Error("Users data not found");
-    //         }
-    //         setUsers(res.data.results)
-    //     } catch (error) {
-    //         console.log("error: ", error);
-    //     }
-    // }
+        try {
+            setIsLoadingMoreUsers(true);
+            let res = await axiosInstance.get(userNextPage);
+            console.log("More users: ", res);
+
+            setUsers(prev => [...prev, ...res.data.results]);
+            setUserNextPage(res.data.next);
+            setHasMoreUsers(!!res.data.next);
+        } catch (error) {
+            console.log("error fetching more users: ", error);
+        } finally {
+            setIsLoadingMoreUsers(false);
+        }
+    }
+
+
 
     const deleteUser = async (userId) => {
         try {
@@ -57,10 +82,45 @@ export const StoreContextProvider = ({ children }) => {
         }
     }
 
+    const fetchListings = async () => {
+        try {
+            setIsLoadingMoreListings(true);
+            let res = await axiosInstance.get('/api/admin/listings/?&limit=10&offset=0');
+            console.log("res: ", res);
+            setTotalListings(res.data.count)
+            setListings(res.data.results);
+            setNextPage(res.data.next);
+            setHasMoreListings(!!res.data.next);
+        } catch (error) {
+            console.log("error: ", error);
+        } finally {
+            setIsLoadingMoreListings(false);
+        }
+    }
+
+    // Fetch more listings when user scrolls to bottom
+    const fetchMoreListings = async () => {
+        if (!nextPage || isLoadingMoreListings || !hasMoreListings) return;
+
+        try {
+            setIsLoadingMoreListings(true);
+            let res = await axiosInstance.get(nextPage);
+            console.log("More listings: ", res);
+
+            setListings(prev => [...prev, ...res.data.results]);
+            setNextPage(res.data.next);
+            setHasMoreListings(!!res.data.next);
+        } catch (error) {
+            console.log("error fetching more: ", error);
+        } finally {
+            setIsLoadingMoreListings(false);
+        }
+    }
+
     useEffect(() => {
         fetchUsers()
+        fetchListings()
     }, [])
-
 
     const value = {
         login,
@@ -68,7 +128,24 @@ export const StoreContextProvider = ({ children }) => {
         users,
         setUsers,
         userLoading,
-        deleteUser
+        deleteUser,
+        totalUser,
+
+        // User infinite scroll
+        fetchMoreUsers, // Use dummy for now, replace with fetchMoreUsers when API supports it
+        hasMoreUsers,
+        isLoadingMoreUsers,
+
+        // Listings
+        listings,
+        setListings,
+        setTotalListings,
+        totalListings,
+
+        // Listing infinite scroll
+        fetchMoreListings,
+        hasMoreListings,
+        isLoadingMoreListings
 
     }
     return (

@@ -1,25 +1,37 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { StoreContext } from "../context/StoreContext";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { users,setUsers,  userLoading, deleteUser } = useContext(StoreContext);
-  
+  const {
+    users,
+    setUsers,
+    userLoading,
+    deleteUser,
+    totalUser,
+    listings,
+    setListings,
+    deleteListing,
+    totalListings,
+    setTotalListings,
+    fetchMoreListings,
+    // Add these to your StoreContext
+    fetchMoreUsers,
+    hasMoreUsers,
+    hasMoreListings,
+    isLoadingMoreUsers,
+    isLoadingMoreListings
+  } = useContext(StoreContext);
 
-  // Local state
-  const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [confirm, setConfirm] = useState({ open: false, type: null, id: null });
   const [search, setSearch] = useState("");
 
-  // Dummy listings data
-  const dummyListings = [
-    { id: "l1", title: "Cozy Studio - Downtown", host: "Ravi Kumar", price: 2400, created: "2025-03-01" },
-    { id: "l2", title: "Sea View Apartment", host: "Asha Patel", price: 4200, created: "2024-12-15" },
-    { id: "l3", title: "Hilltop Bungalow", host: "Maya Sen", price: 5400, created: "2025-06-05" },
-  ];
+  // Refs for scroll containers
+  const usersContainerRef = useRef(null);
+  const listingsContainerRef = useRef(null);
 
   // Stats derived from data
   const stats = useMemo(() => ({
@@ -28,30 +40,40 @@ export default function Dashboard() {
     bookings: Math.floor(Math.random() * 200),
     hosts: users.filter(user => user.role === "HO").length,
     guests: users.filter(user => user.role === "GU").length,
+    totalRevenue: listings.reduce((sum, listing) => sum + (listing.price_per_night || 0), 0)
   }), [users, listings]);
 
-  useEffect(() => {
-    handleFetchListings();
-  }, []);
+  // Format date for display
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
 
-  function handleFetchListings() {
-    setLoading(true);
-    setTimeout(() => {
-      setListings(dummyListings);
-      setLoading(false);
-      setMessage("Listings loaded successfully");
-      clearMessageAfter();
-    }, 800);
+  // Get role display name
+  function getRoleDisplay(role) {
+    return role === "HO" ? "Host" : "Guest";
+  }
+
+  // Format price with commas
+  function formatPrice(price) {
+    return new Intl.NumberFormat('en-IN').format(price);
   }
 
   async function handleDeleteUser(id) {
     setUsers(prev => prev.filter(u => u.id !== id ))
     await deleteUser(id)
+    setMessage("User deleted successfully");
+    clearMessageAfter();
   }
 
   async function handleDeleteListing(id)  {
       setLoading(true);
       setListings(prev => prev.filter(l => l.id !== id));
+      await deleteListing(id);
       setLoading(false);
       setMessage("Listing deleted successfully");
       clearMessageAfter();
@@ -76,20 +98,32 @@ export default function Dashboard() {
     cancelConfirm();
   }
 
-  // Format date for display
-  function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  }
+  // Infinite scroll handlers
+  const handleUsersScroll = useCallback((e) => {
+    const container = e.target;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    
+    // Load more when 80% scrolled
+    if (scrollHeight - scrollTop <= clientHeight * 1.2 && 
+        hasMoreUsers && 
+        !isLoadingMoreUsers && 
+        !userLoading) {
+      fetchMoreUsers();
+    }
+  }, [hasMoreUsers, isLoadingMoreUsers, userLoading, fetchMoreUsers]);
 
-  // Get role display name
-  function getRoleDisplay(role) {
-    return role === "HO" ? "Host" : "Guest";
-  }
+  const handleListingsScroll = useCallback((e) => {
+    const container = e.target;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    
+    // Load more when 80% scrolled
+    if (scrollHeight - scrollTop <= clientHeight * 1.2 && 
+        hasMoreListings && 
+        !isLoadingMoreListings && 
+        !loading) {
+      fetchMoreListings();
+    }
+  }, [hasMoreListings, isLoadingMoreListings, loading, fetchMoreListings]);
 
   // Filtered lists based on search
   const filteredUsers = users.filter(user =>
@@ -97,10 +131,10 @@ export default function Dashboard() {
   );
 
   const filteredListings = listings.filter(listing =>
-    (listing.title + listing.host).toLowerCase().includes(search.toLowerCase())
+    (listing.title + listing.host?.username).toLowerCase().includes(search.toLowerCase())
   );
 
-  const isLoading = userLoading;
+  const isLoading = userLoading || loading;
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -150,7 +184,7 @@ export default function Dashboard() {
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Total Users"
-            value={stats.users}
+            value={totalUser}
             description="Registered users"
             loading={isLoading}
           />
@@ -161,15 +195,15 @@ export default function Dashboard() {
             loading={isLoading}
           />
           <StatCard
-            title="Guests"
-            value={stats.guests}
-            description="Traveling guests"
+            title="Listings"
+            value={totalListings}
+            description="Active properties"
             loading={isLoading}
           />
           <StatCard
-            title="Listings"
-            value={stats.listings}
-            description="Active properties"
+            title="Total Revenue"
+            value={`₹${formatPrice(stats.totalRevenue)}`}
+            description="Monthly potential"
             loading={isLoading}
           />
         </section>
@@ -187,9 +221,14 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div 
+              ref={usersContainerRef}
+              onScroll={handleUsersScroll}
+              className="overflow-x-auto relative"
+              style={{ height: '600px' }} // Fixed height for 10 users
+            >
               <table className="w-full min-w-[600px]">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                   <tr>
                     <th className="text-left py-3 px-4 text-xs font-medium text-gray-600 uppercase tracking-wider">User</th>
                     <th className="text-left py-3 px-4 text-xs font-medium text-gray-600 uppercase tracking-wider">Role</th>
@@ -198,9 +237,9 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {userLoading ? (
-                    // Compact shimmer effect for loading
-                    Array.from({ length: 6 }).map((_, index) => (
+                  {userLoading && users.length === 0 ? (
+                    // Initial loading
+                    Array.from({ length: 10 }).map((_, index) => (
                       <tr key={index} className="animate-pulse">
                         <td className="py-3 px-4">
                           <div className="flex items-center space-x-3">
@@ -240,71 +279,94 @@ export default function Dashboard() {
                       </td>
                     </tr>
                   ) : (
-                    filteredUsers.map(user => (
-                      <tr key={user.id} className="hover:bg-gray-50 transition-colors group">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="flex-shrink-0">
-                              {user.profile_pic ? (
-                                <img
-                                  src={user.profile_pic}
-                                  alt={user.username}
-                                  className="w-8 h-8 rounded-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                                  {user.username.charAt(0).toUpperCase()}
+                    <>
+                      {filteredUsers.map(user => (
+                        <tr key={user.id} className="hover:bg-gray-50 transition-colors group">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-3">
+                              <div className="flex-shrink-0">
+                                {user.profile_pic ? (
+                                  <img
+                                    src={user.profile_pic}
+                                    alt={user.username}
+                                    className="w-8 h-8 rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                    {user.username.charAt(0).toUpperCase()}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-sm font-medium text-gray-900 truncate max-w-[120px]">
+                                  {user.username}
                                 </div>
-                              )}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="text-sm font-medium text-gray-900 truncate max-w-[120px]">
-                                {user.username}
-                              </div>
-                              <div className="text-xs text-gray-500 truncate max-w-[140px]">
-                                {user.email || "No email"}
+                                <div className="text-xs text-gray-500 truncate max-w-[140px]">
+                                  {user.email || "No email"}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${user.role === "HO"
-                            ? "bg-orange-100 text-orange-800 border border-orange-200"
-                            : "bg-blue-100 text-blue-800 border border-blue-200"
-                            }`}>
-                            {getRoleDisplay(user.role)}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="text-sm text-gray-600 whitespace-nowrap">
-                            {formatDate(user.date_joined)}
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-1.5">
-                            <button
-                              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
-                              onClick={() => alert(JSON.stringify(user, null, 2))}
-                              title="View details"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              </svg>
-                            </button>
-                            <button
-                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                              onClick={() => confirmDelete("user", user.id)}
-                              title="Delete user"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${user.role === "HO"
+                              ? "bg-orange-100 text-orange-800 border border-orange-200"
+                              : "bg-blue-100 text-blue-800 border border-blue-200"
+                              }`}>
+                              {getRoleDisplay(user.role)}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="text-sm text-gray-600 whitespace-nowrap">
+                              {formatDate(user.date_joined)}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-1.5">
+                              <button
+                                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                                onClick={() => alert(JSON.stringify(user, null, 2))}
+                                title="View details"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                              </button>
+                              <button
+                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                onClick={() => confirmDelete("user", user.id)}
+                                title="Delete user"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      
+                      {/* Loading indicator for infinite scroll */}
+                      {isLoadingMoreUsers && (
+                        <tr>
+                          <td colSpan={4} className="py-4">
+                            <div className="flex justify-center items-center">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                              <span className="ml-2 text-sm text-gray-500">Loading more users...</span>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                      
+                      {/* End of users message */}
+                      {!hasMoreUsers && filteredUsers.length > 0 && (
+                        <tr>
+                          <td colSpan={4} className="py-4 text-center text-gray-500 text-sm">
+                            No more users to load
+                          </td>
+                        </tr>
+                      )}
+                    </>
                   )}
                 </tbody>
               </table>
@@ -312,52 +374,52 @@ export default function Dashboard() {
           </div>
 
           {/* Listings Table */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-gray-800">Property Listings</h3>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={handleFetchListings}
-                    className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors text-sm font-medium"
-                  >
-                    Refresh
-                  </button>
+                <h3 className="text-lg font-semibold text-gray-800">Property Listings</h3>
+                <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                  {totalListings} {totalListings === 1 ? 'listing' : 'listings'}
                 </div>
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+            <div 
+              ref={listingsContainerRef}
+              onScroll={handleListingsScroll}
+              className="overflow-x-auto relative"
+              style={{ height: '600px' }} 
+            >
+              <table className="w-full min-w-[600px]">
+                <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                   <tr>
-                    <th className="text-left py-4 px-6 text-sm font-medium text-gray-700">Property</th>
-                    <th className="text-left py-4 px-6 text-sm font-medium text-gray-700">Host</th>
-                    <th className="text-left py-4 px-6 text-sm font-medium text-gray-700">Price</th>
-                    <th className="text-left py-4 px-6 text-sm font-medium text-gray-700">Actions</th>
+                    <th className="text-left py-3 px-4 text-xs font-medium text-gray-600 uppercase tracking-wider">Property</th>
+                    <th className="text-left py-3 px-4 text-xs font-medium text-gray-600 uppercase tracking-wider">Location</th>
+                    <th className="text-left py-3 px-4 text-xs font-medium text-gray-600 uppercase tracking-wider">Price/Night</th>
+                    <th className="text-left py-3 px-4 text-xs font-medium text-gray-600 uppercase tracking-wider w-28">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {isLoading ? (
-                    // Shimmer effect for listings
-                    Array.from({ length: 3 }).map((_, index) => (
-                      <tr key={index}>
-                        <td className="py-4 px-6">
-                          <div className="space-y-2">
-                            <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
-                            <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
+                  {isLoading && listings.length === 0 ? (
+                    // Initial loading
+                    Array.from({ length: 10 }).map((_, index) => (
+                      <tr key={index} className="animate-pulse">
+                        <td className="py-3 px-4">
+                          <div className="space-y-1.5">
+                            <div className="h-3.5 bg-gray-200 rounded w-24"></div>
+                            <div className="h-2.5 bg-gray-200 rounded w-32"></div>
                           </div>
                         </td>
-                        <td className="py-4 px-6">
-                          <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                        <td className="py-3 px-4">
+                          <div className="h-3.5 bg-gray-200 rounded w-20"></div>
                         </td>
-                        <td className="py-4 px-6">
-                          <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                        <td className="py-3 px-4">
+                          <div className="h-3.5 bg-gray-200 rounded w-16"></div>
                         </td>
-                        <td className="py-4 px-6">
-                          <div className="flex space-x-2">
-                            <div className="h-8 bg-gray-200 rounded w-16 animate-pulse"></div>
-                            <div className="h-8 bg-gray-200 rounded w-16 animate-pulse"></div>
+                        <td className="py-3 px-4">
+                          <div className="flex space-x-1.5">
+                            <div className="h-7 bg-gray-200 rounded w-12"></div>
+                            <div className="h-7 bg-gray-200 rounded w-12"></div>
                           </div>
                         </td>
                       </tr>
@@ -365,49 +427,107 @@ export default function Dashboard() {
                   ) : filteredListings.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="py-8 text-center text-gray-500">
-                        No listings found
+                        <div className="flex flex-col items-center justify-center space-y-2">
+                          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                            <span className="text-gray-400">🏠</span>
+                          </div>
+                          <div>No listings found</div>
+                          {search && (
+                            <div className="text-sm text-gray-400">Try adjusting your search</div>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ) : (
-                    filteredListings.map(listing => (
-                      <tr key={listing.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="py-4 px-6">
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              {listing.title}
+                    <>
+                      {filteredListings.map(listing => (
+                        <tr key={listing.id} className="hover:bg-gray-50 transition-colors group">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-3">
+                              <div className="flex-shrink-0">
+                                {listing.images && listing.images.length > 0 ? (
+                                  <img
+                                    src={listing.images[0].url}
+                                    alt={listing.title}
+                                    className="w-8 h-8 rounded-lg object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-sm font-medium">
+                                    🏠
+                                  </div>
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-sm font-medium text-gray-900 truncate max-w-[120px]">
+                                  {listing.title}
+                                </div>
+                                <div className="text-xs text-gray-500 truncate max-w-[140px]">
+                                  {listing.host?.username || "Unknown host"}
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-500">
-                              Created {listing.created}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="text-sm text-gray-600 whitespace-nowrap">
+                              {listing.location?.city || "Unknown"}
                             </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-6 text-sm text-gray-600">
-                          {listing.host}
-                        </td>
-                        <td className="py-4 px-6">
-                          <span className="font-semibold text-gray-900">
-                            ₹{listing.price}
-                          </span>
-                          <span className="text-gray-500 text-sm">/month</span>
-                        </td>
-                        <td className="py-4 px-6">
-                          <div className="flex items-center space-x-2">
-                            <button
-                              className="px-3 py-1 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
-                              onClick={() => alert(JSON.stringify(listing, null, 2))}
-                            >
-                              View
-                            </button>
-                            <button
-                              className="px-3 py-1 text-sm rounded-lg bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-colors"
-                              onClick={() => confirmDelete("listing", listing.id)}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                            <div className="text-xs text-gray-400">
+                              {listing.location?.state || ""}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+                              ₹{formatPrice(listing.price_per_night)}
+                            </div>
+                            <div className="text-xs text-gray-500">per night</div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-1.5">
+                              <button
+                                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                                onClick={() => alert(JSON.stringify(listing, null, 2))}
+                                title="View details"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                              </button>
+                              <button
+                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                onClick={() => confirmDelete("listing", listing.id)}
+                                title="Delete listing"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      
+                      {/* Loading indicator for infinite scroll */}
+                      {isLoadingMoreListings && (
+                        <tr>
+                          <td colSpan={4} className="py-4">
+                            <div className="flex justify-center items-center">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                              <span className="ml-2 text-sm text-gray-500">Loading more listings...</span>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                      
+                      {/* End of listings message */}
+                      {!hasMoreListings && filteredListings.length > 0 && (
+                        <tr>
+                          <td colSpan={4} className="py-4 text-center text-gray-500 text-sm">
+                            No more listings to load
+                          </td>
+                        </tr>
+                      )}
+                    </>
                   )}
                 </tbody>
               </table>
@@ -469,7 +589,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
