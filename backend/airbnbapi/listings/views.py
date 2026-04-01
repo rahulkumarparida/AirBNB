@@ -8,6 +8,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import HotelsListing, HotelImages , Review
 from .serializers import HotelsListingSerializer, HotelImageSerializer , ReviewSerializer
 from .permissions import IsHostOrReadOnly, IsListingOwner
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 
 
@@ -19,6 +21,7 @@ class ListingAllHotelsView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsHostOrReadOnly]
     pagination_class = None  
 
+    @method_decorator(cache_page(60 * 5))
     def get_queryset(self):
         
         queryset = (
