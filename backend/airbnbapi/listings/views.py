@@ -15,13 +15,13 @@ from django.views.decorators.cache import cache_page
 
 
 
+@method_decorator(cache_page(60 * 5), name='dispatch')
 class ListingAllHotelsView(generics.ListAPIView):
     serializer_class = HotelsListingSerializer
     authentication_classes = [authentication.JWTAuthentication]
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsHostOrReadOnly]
     pagination_class = None  
 
-    @method_decorator(cache_page(60 * 5))
     def get_queryset(self):
         
         queryset = (
